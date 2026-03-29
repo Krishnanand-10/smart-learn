@@ -71,7 +71,7 @@ export default function InputHub() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Topic Name</label>
               <input 
                 type="text" 
-                placeholder="e.g. Thermodynamics, Machine Learning..."
+                placeholder="e.g. Topic 1, Topic 2..."
                 style={{ width: '100%', padding: '1rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-color)', color: 'white', borderRadius: 'var(--radius)', marginBottom: '1rem' }}
               />
               <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--accent-color)', color: 'var(--accent-color)' }}>+ Add Another Topic</button>

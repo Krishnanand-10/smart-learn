@@ -1,16 +1,10 @@
 'use client';
 
 import { Activity, Target, TrendingUp, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Tracker() {
-  const mockData = [
-    { topic: "Thermodynamics", correct: 18, total: 20, status: "strong" },
-    { topic: "Kinetics", correct: 15, total: 20, status: "good" },
-    { type: "separator" },
-    { topic: "Machine Learning Concepts", correct: 12, total: 20, status: "average" },
-    { topic: "Data Structures", correct: 8, total: 20, status: "weak" },
-    { topic: "Operating Systems", correct: 5, total: 20, status: "critical" },
-  ];
+  const data = []; // Empty state by default
 
   const getColor = (status) => {
     switch(status) {
@@ -37,7 +31,7 @@ export default function Tracker() {
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>Total Questions</h3>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>342</p>
+            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>0</p>
           </div>
         </div>
         
@@ -47,7 +41,7 @@ export default function Tracker() {
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>Global Accuracy</h3>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>68%</p>
+            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>0%</p>
           </div>
         </div>
 
@@ -57,7 +51,7 @@ export default function Tracker() {
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>Primary Target</h3>
-            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>Operating Systems</p>
+            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-main)' }}>None Set</p>
           </div>
         </div>
       </div>
@@ -67,34 +61,49 @@ export default function Tracker() {
           <AlertTriangle color="var(--accent-secondary)" /> Focus Topics Dashboard
         </h2>
         
-        {/* Mock Heatmap visualization using grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {mockData.map((item, idx) => {
-            if (item.type === 'separator') return <hr key={idx} style={{ borderColor: 'var(--border-color)', margin: '1rem 0' }} />;
-            
-            const accuracy = (item.correct / item.total) * 100;
-            const barColor = getColor(item.status);
+        {data.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-main)', opacity: 0.7 }}>
+            No exam data found. Take some practice questions to generate your performance heatmap.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {data.map((item, idx) => {
+              if (item.type === 'separator') return <hr key={idx} style={{ borderColor: 'var(--border-color)', margin: '1rem 0' }} />;
+              
+              const accuracy = (item.correct / item.total) * 100;
+              const barColor = getColor(item.status);
 
-            return (
-              <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 3fr 1fr', alignItems: 'center', gap: '1rem' }}>
-                <span style={{ fontWeight: '500' }}>{item.topic}</span>
-                <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', overflow: 'hidden' }}>
-                  <div style={{ width: `${accuracy}%`, height: '100%', background: barColor, transition: 'var(--transition)' }}></div>
+              return (
+                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 3fr 1fr', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontWeight: '500' }}>{item.topic}</span>
+                  <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', overflow: 'hidden' }}>
+                    <div style={{ width: `${accuracy}%`, height: '100%', background: barColor, transition: 'var(--transition)' }}></div>
+                  </div>
+                  <span style={{ textAlign: 'right', fontWeight: 'bold', color: barColor }}>{Math.round(accuracy)}%</span>
                 </div>
-                <span style={{ textAlign: 'right', fontWeight: 'bold', color: barColor }}>{Math.round(accuracy)}%</span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
       
-      <div className="glass-panel" style={{ background: 'linear-gradient(45deg, rgba(244, 67, 54, 0.1), rgba(0,0,0,0.2))' }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>AI Study Recommendation</h3>
-        <p style={{ lineHeight: '1.6', margin: 0 }}>
-          Your performance in <strong>Operating Systems</strong> has dropped below 30% in the last two mock exams. We recommend reviewing the generated <a href="/summarizer" style={{ color: 'var(--accent-color)' }}>Smart Summaries</a> for this topic and attempting 10 targeted practice questions.
-        </p>
-        <button className="btn-primary" style={{ marginTop: '1.5rem' }}>Start Targeted Practice</button>
-      </div>
+      {data.length === 0 ? (
+        <div className="glass-panel" style={{ background: 'rgba(0,0,0,0.2)', textAlign: 'center', padding: '2rem' }}>
+           <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)' }}>AI Study Recommendation</h3>
+           <p style={{ margin: 0, opacity: 0.7 }}>Recommendations will appear once enough data is tracked.</p>
+           <div style={{ marginTop: '1.5rem' }}>
+             <Link href="/question-generator" className="btn-primary">Go to Practice Questions</Link>
+           </div>
+        </div>
+      ) : (
+        <div className="glass-panel" style={{ background: 'linear-gradient(45deg, rgba(244, 67, 54, 0.1), rgba(0,0,0,0.2))' }}>
+          <h3 style={{ margin: '0 0 1rem 0' }}>AI Study Recommendation</h3>
+          <p style={{ lineHeight: '1.6', margin: 0 }}>
+            Your performance has dropped below 30% in a key module. We recommend reviewing the generated <Link href="/summarizer" style={{ color: 'var(--accent-color)' }}>Smart Summaries</Link> for this topic and attempting targeted practice questions.
+          </p>
+          <button className="btn-primary" style={{ marginTop: '1.5rem' }}>Start Targeted Practice</button>
+        </div>
+      )}
 
     </main>
   );

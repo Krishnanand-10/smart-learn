@@ -20,12 +20,12 @@ export default function MemCode() {
     setTimeout(() => {
       // Mock generated mnemonic based on typical long answers
       setMemCode({
-        acronym: "H-E-A-T",
+        acronym: "M-O-C-K",
         points: [
-          { letter: "H", text: "Higher entropy state inevitably occurs" },
-          { letter: "E", text: "Energy transforms but is never lost" },
-          { letter: "A", text: "Absolute zero is unreachable (3rd law)" },
-          { letter: "T", text: "Temperature dictates heat flow direction" }
+          { letter: "M", text: "Main point extracted from your text" },
+          { letter: "O", text: "Other supporting details" },
+          { letter: "C", text: "Core concepts to remember" },
+          { letter: "K", text: "Key takeaways for the exam" }
         ]
       });
       setIsGenerating(false);
