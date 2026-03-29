@@ -1,10 +1,42 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Activity, Target, TrendingUp, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Tracker() {
-  const data = []; // Empty state by default
+  const [data, setData] = useState([]); // Empty state by default
+
+  useEffect(() => {
+    // Read the topic that the user submitted via Input Hub 
+    const saved = localStorage.getItem('examBrain_topics');
+    if (saved) {
+      const parsedTopics = JSON.parse(saved);
+      if (parsedTopics && parsedTopics.length > 0) {
+        
+        // Dynamically build heatmap mock data for their specific topics
+        const generatedData = parsedTopics.map((topic, i) => {
+           const statuses = ['good', 'weak', 'average', 'strong', 'critical'];
+           const randomStatus = statuses[i % statuses.length];
+           // Generate random stats
+           const total = 20;
+           let correct = 14;
+           if (randomStatus === 'weak') correct = 7;
+           if (randomStatus === 'critical') correct = 4;
+           if (randomStatus === 'strong') correct = 18;
+           
+           return {
+              topic: topic,
+              correct: correct,
+              total: total,
+              status: randomStatus
+           };
+        });
+        
+        setData(generatedData);
+      }
+    }
+  }, []);
 
   const getColor = (status) => {
     switch(status) {
@@ -16,6 +48,13 @@ export default function Tracker() {
       default: return '#ccc';
     }
   };
+
+  const totalQuestions = data.reduce((acc, curr) => acc + curr.total, 0);
+  const correctQuestions = data.reduce((acc, curr) => acc + curr.correct, 0);
+  const accuracy = totalQuestions > 0 ? Math.round((correctQuestions / totalQuestions) * 100) : 0;
+  
+  const weakTopics = data.filter(d => ['weak', 'critical'].includes(d.status));
+  const primaryTarget = weakTopics.length > 0 ? weakTopics[0].topic : 'None Set';
 
   return (
     <main className="main-content">
@@ -31,7 +70,7 @@ export default function Tracker() {
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>Total Questions</h3>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>0</p>
+            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>{totalQuestions}</p>
           </div>
         </div>
         
@@ -41,7 +80,7 @@ export default function Tracker() {
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>Global Accuracy</h3>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>0%</p>
+            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>{accuracy}%</p>
           </div>
         </div>
 
@@ -51,7 +90,7 @@ export default function Tracker() {
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>Primary Target</h3>
-            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-main)' }}>None Set</p>
+            <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', display: 'block', maxWidth: '200px'  }}>{primaryTarget}</p>
           </div>
         </div>
       </div>

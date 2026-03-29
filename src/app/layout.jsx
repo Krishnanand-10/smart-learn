@@ -10,7 +10,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="app-container">
+        <div className="app-layout">
           <Sidebar />
           {children}
         </div>
