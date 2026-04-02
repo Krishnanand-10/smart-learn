@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Lightbulb, Save, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-export default function MemCode() {
+function MemCodeInner() {
   const searchParams = useSearchParams();
   const initialText = searchParams?.get('text') || '';
   
@@ -172,5 +172,13 @@ export default function MemCode() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function MemCode() {
+  return (
+    <Suspense fallback={<main className="main-content"><p style={{ color: 'var(--text-main)' }}>Loading...</p></main>}>
+      <MemCodeInner />
+    </Suspense>
   );
 }
