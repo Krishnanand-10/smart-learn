@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, CheckCircle, XCircle, Link, FileText, Loader, ChevronRight, Trophy } from 'lucide-react';
 
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent`;
 
 export default function Quiz() {
   const [topic, setTopic] = useState('');
@@ -44,6 +44,9 @@ The "answer" field must be exactly one of the option strings (not just a letter)
 
     try {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey || apiKey === 'your_api_key_here') {
+        throw new Error('API key not configured. Please add your Gemini API key to .env.local and restart the server.');
+      }
       const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -53,13 +56,17 @@ The "answer" field must be exactly one of the option strings (not just a letter)
         }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        const apiMsg = data?.error?.message || `HTTP ${res.status}`;
+        throw new Error(`Gemini API error: ${apiMsg}`);
+      }
       const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const cleaned = raw.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(cleaned);
-      if (!Array.isArray(parsed)) throw new Error('Invalid format');
+      if (!Array.isArray(parsed)) throw new Error('Unexpected response format from AI. Please try again.');
       setQuestions(parsed);
     } catch (e) {
-      setError('Failed to generate quiz. Try again or check your API key.');
+      setError(e.message || 'Failed to generate quiz. Please try again.');
     } finally {
       setLoading(false);
     }

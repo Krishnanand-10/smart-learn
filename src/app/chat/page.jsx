@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Loader, Link, FileText, Film, Music, Trash2 } from 'lucide-react';
 
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent`;
 
 function getContextInfo(content) {
   if (!content) return null;
