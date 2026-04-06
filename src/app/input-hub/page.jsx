@@ -33,7 +33,7 @@ export default function InputHub() {
       }
 
       if (savedTopics.length > 0) {
-        localStorage.setItem('examBrain_topics', JSON.stringify(savedTopics));
+        localStorage.setItem('smartLearn_topics', JSON.stringify(savedTopics));
       }
 
       setIsProcessing(false);

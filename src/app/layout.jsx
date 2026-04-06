@@ -2,7 +2,7 @@ import './globals.css';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata = {
-  title: 'Exam Brain',
+  title: 'Smart Learn',
   description: 'AI-Powered Exam Preparation Engine',
 };
 

@@ -11,7 +11,7 @@ export default function Summarizer() {
 
   useEffect(() => {
     // Read the topic that the user submitted via Input Hub 
-    const saved = localStorage.getItem('examBrain_topics');
+    const saved = localStorage.getItem('smartLearn_topics');
     if (saved) {
       const parsedTopics = JSON.parse(saved);
       if (parsedTopics && parsedTopics.length > 0) {

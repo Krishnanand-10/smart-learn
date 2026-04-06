@@ -11,14 +11,14 @@ export default function Sidebar() {
 
   useEffect(() => {
     // Read the saved theme from local storage
-    const savedTheme = localStorage.getItem('examBrain_theme') || 'light-gfg';
+    const savedTheme = localStorage.getItem('smartLearn_theme') || 'light-gfg';
     setTheme(savedTheme);
     document.body.setAttribute('data-theme', savedTheme);
   }, []);
 
   const changeTheme = (newTheme) => {
     setTheme(newTheme);
-    localStorage.setItem('examBrain_theme', newTheme);
+    localStorage.setItem('smartLearn_theme', newTheme);
     document.body.setAttribute('data-theme', newTheme);
   };
 
@@ -31,7 +31,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="logo-container">
         <Brain size={24} />
-        <h2>Exam Brain</h2>
+        <h2>Smart Learn</h2>
       </div>
 
       <nav style={{ flex: 1 }}>
