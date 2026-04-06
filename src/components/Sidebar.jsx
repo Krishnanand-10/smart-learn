@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Brain, FileText, Zap } from 'lucide-react';
+import { Brain, FileText, MessageCircle, CreditCard, ClipboardList } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Sidebar() {
@@ -24,7 +24,9 @@ export default function Sidebar() {
 
   const navItems = [
     { name: 'Input Hub', path: '/input-hub', icon: FileText },
-    { name: 'Summarizer', path: '/summarizer', icon: Zap },
+    { name: 'AI Tutor Chat', path: '/chat', icon: MessageCircle },
+    { name: 'Flashcards', path: '/flashcards', icon: CreditCard },
+    { name: 'Quiz', path: '/quiz', icon: ClipboardList },
   ];
 
   return (

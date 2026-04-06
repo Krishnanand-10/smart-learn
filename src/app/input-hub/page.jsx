@@ -1,136 +1,242 @@
 'use client';
 
-import { useState } from 'react';
-import { UploadCloud, File, Type, CheckCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { UploadCloud, Link, FileText, Film, Music, CheckCircle, X, AlertCircle } from 'lucide-react';
+
+const FILE_TYPES = {
+  'application/pdf': { label: 'PDF', icon: FileText, color: '#ef4444' },
+  'video/mp4': { label: 'Video', icon: Film, color: '#8b5cf6' },
+  'video/webm': { label: 'Video', icon: Film, color: '#8b5cf6' },
+  'video/ogg': { label: 'Video', icon: Film, color: '#8b5cf6' },
+  'audio/mpeg': { label: 'Audio', icon: Music, color: '#f59e0b' },
+  'audio/wav': { label: 'Audio', icon: Music, color: '#f59e0b' },
+  'audio/ogg': { label: 'Audio', icon: Music, color: '#f59e0b' },
+  'audio/mp4': { label: 'Audio', icon: Music, color: '#f59e0b' },
+  'image/png': { label: 'Image', icon: FileText, color: '#10b981' },
+  'image/jpeg': { label: 'Image', icon: FileText, color: '#10b981' },
+};
 
 export default function InputHub() {
   const [activeTab, setActiveTab] = useState('upload');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
-  
-  const [textInput, setTextInput] = useState('');
-  const [topicInput, setTopicInput] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [linkInput, setLinkInput] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
-  const handleSimulateUpload = () => {
-    setIsProcessing(true);
-    setSuccess(false);
-    setTimeout(() => {
-      // Create a global list of generated topics based on what the user inputted
-      let savedTopics = [];
-      if (activeTab === 'manual' && topicInput.trim()) {
-        savedTopics.push(topicInput.trim());
-      } else if (activeTab === 'text' && textInput.trim()) {
-        const words = textInput.split(' ');
-        const extractedTopic = words.length > 2 ? words.slice(0, 3).join(' ') + '...' : 'Custom Notes';
-        savedTopics.push(extractedTopic);
-      } else if (activeTab === 'upload' && uploadedFile) {
-        // Mocking AI file parsing: Extract the file name, strip extensions & symbols, format it into a Topic.
-        let parsedTopic = uploadedFile.name.split('.')[0].replace(/[-_]/g, ' ');
-        // Title Case capitalization
-        parsedTopic = parsedTopic.replace(/\b\w/g, l => l.toUpperCase());
-        savedTopics.push(`${parsedTopic} (From File)`);
-      }
+  const getFileInfo = (file) => FILE_TYPES[file?.type] || { label: 'File', icon: FileText, color: '#6366f1' };
 
-      if (savedTopics.length > 0) {
-        localStorage.setItem('smartLearn_topics', JSON.stringify(savedTopics));
-      }
-
-      setIsProcessing(false);
-      setSuccess(true);
-    }, 1500); 
+  const handleFile = (file) => {
+    setError('');
+    setSaved(false);
+    setUploadedFile(file);
+    // Store file metadata in localStorage for other pages to use
+    localStorage.setItem('smartLearn_content', JSON.stringify({
+      type: 'file',
+      name: file.name,
+      fileType: file.type,
+      size: file.size,
+    }));
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setUploadedFile(e.target.files[0]);
-      setSuccess(false); // Reset success state when a new file is uploaded
-    }
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
   };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleLinkSave = () => {
+    if (!linkInput.trim()) { setError('Please enter a valid URL.'); return; }
+    try {
+      new URL(linkInput.trim());
+    } catch {
+      setError('Invalid URL. Please include https://');
+      return;
+    }
+    setError('');
+    localStorage.setItem('smartLearn_content', JSON.stringify({
+      type: 'link',
+      url: linkInput.trim(),
+    }));
+    setSaved(true);
+  };
+
+  const clearContent = () => {
+    setUploadedFile(null);
+    setLinkInput('');
+    setSaved(false);
+    setError('');
+    localStorage.removeItem('smartLearn_content');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const fileInfo = uploadedFile ? getFileInfo(uploadedFile) : null;
+  const FileIcon = fileInfo?.icon || FileText;
 
   return (
     <main className="main-content">
       <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Input Hub & Data Processing</h1>
-        <p style={{ color: 'var(--text-main)' }}>Upload your notes, syllabus, or paste text directly for AI analysis.</p>
+        <h1 style={{ marginBottom: '0.5rem' }}>Input Hub</h1>
+        <p style={{ color: 'var(--text-main)' }}>
+          Upload a PDF, video, or audio file — or paste a link — to power your AI tutor, flashcards, and quizzes.
+        </p>
       </header>
 
+      {/* Tab Switcher */}
       <div className="glass-panel">
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-          <button 
+        <div style={{ display: 'flex', gap: '0', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
+          <button
             className={`tab-btn ${activeTab === 'upload' ? 'active' : ''}`}
-            onClick={() => setActiveTab('upload')}
+            onClick={() => { setActiveTab('upload'); setError(''); }}
           >
-            <UploadCloud size={18} /> File Upload
+            <UploadCloud size={16} /> File Upload
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'text' ? 'active' : ''}`}
-            onClick={() => setActiveTab('text')}
+          <button
+            className={`tab-btn ${activeTab === 'link' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('link'); setError(''); }}
           >
-            <Type size={18} /> Paste Text
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
-            onClick={() => setActiveTab('manual')}
-          >
-            <File size={18} /> Manual Topics
+            <Link size={16} /> Paste Link
           </button>
         </div>
 
-        <div className="tab-content" style={{ minHeight: '300px' }}>
-          {activeTab === 'upload' && (
-            <div className="upload-area" style={{ textAlign: 'center', padding: '4rem 2rem', border: uploadedFile ? '2px solid #4CAF50' : '2px dashed var(--border-color)', borderRadius: 'var(--radius)', position: 'relative', background: uploadedFile ? 'rgba(76, 175, 80, 0.05)' : 'transparent', transition: 'all 0.3s ease' }}>
-              <input 
-                type="file" 
-                accept=".pdf,image/*,.txt,.docx"
-                onChange={handleFileChange}
-                title="Upload Document"
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
-              />
-              <UploadCloud size={48} color={uploadedFile ? '#4CAF50' : 'var(--accent-color)'} style={{ marginBottom: '1rem' }} />
-              <h3 style={{ color: uploadedFile ? '#4CAF50' : 'white' }}>{uploadedFile ? uploadedFile.name : "Drag & Drop Files Here"}</h3>
-              {uploadedFile ? (
-                 <p style={{ margin: '1rem 0', color: '#8BC34A', fontWeight: 'bold' }}>Document uploaded and ready for processing!</p>
-              ) : (
-                 <p style={{ margin: '1rem 0' }}>Supports PDF, Images (Notes), and Question Papers</p>
-              )}
-              {!uploadedFile && <button className="btn-primary" style={{ pointerEvents: 'none' }}>Browse Files</button>}
-            </div>
-          )}
+        {/* File Upload Tab */}
+        {activeTab === 'upload' && (
+          <div>
+            {!uploadedFile ? (
+              <div
+                className="upload-dropzone"
+                style={{
+                  border: `2px dashed ${isDragging ? 'var(--accent-color)' : 'var(--border-color)'}`,
+                  borderRadius: 'var(--radius)',
+                  padding: '4rem 2rem',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  background: isDragging ? 'rgba(99,102,241,0.05)' : 'transparent',
+                  position: 'relative',
+                }}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,video/*,audio/*,image/*"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
+                <UploadCloud size={48} color="var(--accent-color)" style={{ marginBottom: '1rem', opacity: 0.8 }} />
+                <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>
+                  {isDragging ? 'Drop it here!' : 'Drag & Drop or Click to Browse'}
+                </h3>
+                <p style={{ color: 'var(--text-main)', fontSize: '0.875rem' }}>
+                  Supports PDF, MP4, MP3, WAV, PNG, JPG
+                </p>
+              </div>
+            ) : (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '1.25rem',
+                padding: '1.5rem', border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius)', background: 'rgba(16,185,129,0.04)'
+              }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: '12px',
+                  background: `${fileInfo.color}22`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                }}>
+                  <FileIcon size={24} color={fileInfo.color} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontWeight: 600, color: 'var(--text-highlight)', marginBottom: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {uploadedFile.name}
+                  </p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                    {fileInfo.label} · {(uploadedFile.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontSize: '0.875rem', fontWeight: 600 }}>
+                    <CheckCircle size={16} /> Ready
+                  </span>
+                  <button onClick={clearContent} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', padding: '4px', borderRadius: '4px', display: 'flex' }}>
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
-          {activeTab === 'text' && (
-            <div className="text-area-container">
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Raw Text or Syllabus</label>
-              <textarea 
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="Paste your content here..."
-                style={{ width: '100%', height: '250px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-color)', color: 'white', padding: '1rem', borderRadius: 'var(--radius)', resize: 'none' }}
+        {/* Link Paste Tab */}
+        {activeTab === 'link' && (
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-highlight)' }}>
+              Paste a URL
+            </label>
+            <p style={{ color: 'var(--text-main)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
+              Works with articles, YouTube videos, Wikipedia pages, documentation, blog posts, and more.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <input
+                type="url"
+                value={linkInput}
+                onChange={(e) => { setLinkInput(e.target.value); setSaved(false); setError(''); }}
+                placeholder="https://example.com/article"
+                style={{ flex: 1, minWidth: '200px' }}
+                onKeyDown={(e) => e.key === 'Enter' && handleLinkSave()}
               />
+              <button className="btn-primary" onClick={handleLinkSave}>
+                <Link size={16} /> Save Link
+              </button>
             </div>
-          )}
 
-          {activeTab === 'manual' && (
-            <div className="manual-input">
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Topic Name</label>
-              <input 
-                type="text" 
-                value={topicInput}
-                onChange={(e) => setTopicInput(e.target.value)}
-                placeholder="e.g. Topic 1, Topic 2..."
-                style={{ width: '100%', padding: '1rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-color)', color: 'white', borderRadius: 'var(--radius)', marginBottom: '1rem' }}
-              />
-              <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--accent-color)', color: 'var(--accent-color)' }}>+ Add Another Topic</button>
-            </div>
-          )}
-        </div>
+            {error && (
+              <p style={{ marginTop: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                <AlertCircle size={15} /> {error}
+              </p>
+            )}
 
-        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
-          {success && <span style={{ color: '#4CAF50', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={18} /> Processing Complete</span>}
-          <button className="btn-primary" onClick={handleSimulateUpload} disabled={isProcessing}>
-            {isProcessing ? 'Extracting Data...' : 'Process Content'}
-          </button>
-        </div>
+            {saved && (
+              <div style={{
+                marginTop: '1.25rem', padding: '1rem 1.25rem',
+                border: '1px solid var(--border-color)', borderRadius: 'var(--radius)',
+                background: 'rgba(16,185,129,0.04)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                  <Link size={18} color="#10b981" />
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-highlight)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {linkInput}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                  <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <CheckCircle size={16} /> Saved
+                  </span>
+                  <button onClick={clearContent} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', display: 'flex' }}>
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bottom hint */}
+        {(uploadedFile || saved) && (
+          <p style={{ marginTop: '1.5rem', fontSize: '0.82rem', color: 'var(--text-main)', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            ✅ Content saved. Head to <strong>AI Tutor Chat</strong>, <strong>Flashcards</strong>, or <strong>Quiz</strong> to use it.
+          </p>
+        )}
       </div>
     </main>
   );
