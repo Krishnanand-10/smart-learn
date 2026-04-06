@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Brain, FileText, Zap, Activity, MessageSquare, Palette, Sun, Moon, Sparkles } from 'lucide-react';
+import { Brain, FileText, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Sidebar() {
@@ -25,9 +25,6 @@ export default function Sidebar() {
   const navItems = [
     { name: 'Input Hub', path: '/input-hub', icon: FileText },
     { name: 'Summarizer', path: '/summarizer', icon: Zap },
-    { name: 'Practice Questions', path: '/question-generator', icon: Brain },
-    { name: 'MemCode', path: '/memcode', icon: MessageSquare },
-    { name: 'Weak Area Tracker', path: '/tracker', icon: Activity },
   ];
 
   return (
