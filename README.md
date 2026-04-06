@@ -1,54 +1,69 @@
 # 🧠 Smart Learn
 
-> **A comprehensive, AI-powered exam preparation engine for students and self-learners.**
+> **An AI-powered learning platform — upload anything, chat with your content, and master any topic through quizzes and flashcards.**
 
-Smart Learn is a smart web application where students can upload their class notes, syllabi, or past papers and instantly receive structured study materials. Through an intuitive interface, the app generates interactive summaries and organizes your study content efficiently.
+Smart Learn transforms the way you study. Upload PDFs, videos, audio files, or simply paste a link — then chat with an AI tutor, generate flashcards, and test yourself with quizzes. All powered by AI, all in one place.
 
 ---
 
 ## 🎯 Product Vision
-To provide a seamless, stress-free environment where unstructured study materials are automatically transformed into an optimized, high-yield learning experience. Targeted heavily towards college/university students seeking better grades and faster retention.
 
-## 🗂️ Core Modules
+To make studying effortless and interactive. Smart Learn lets you bring your learning material in any format and instantly turn it into an engaging, AI-driven study experience — whether you want to have a conversation with your notes, drill flashcards, or challenge yourself with a quiz.
 
-1. **Input Hub (`/input-hub`)**
-   - Accept all student content in one centralized place.
-   - Upload UI for PDFs, Images (handwritten notes), and Question Papers.
-   - Raw text parsing interfaces and manual topic logging.
+---
 
-2. **Smart Summarizer (`/summarizer`)**
-   - Converts messy notes into collapsible, structured summaries.
-   - Intelligent bullet-point formatting with key terms highlighted in bold.
-   - "Simplify further" options to break down complex topics.
+## 🗂️ Core Features
+
+### 1. 🤖 AI Tutor Chatbot
+- Chat naturally with an AI tutor about any topic or your uploaded content.
+- Ask follow-up questions, request explanations, and get step-by-step breakdowns.
+- Context-aware responses drawn directly from your uploaded files or links.
+- Like having a personal tutor available 24/7.
+
+### 2. 📁 Multi-Format File Uploading
+- **PDF** — upload lecture notes, textbooks, past papers, or research articles.
+- **Video** — upload recorded lectures or educational videos for AI analysis.
+- **Audio** — upload podcasts, voice notes, or recorded classes.
+- All content is processed and made available across the entire app.
+
+### 3. 🔗 Link Pasting
+- Paste any URL — articles, YouTube videos, Wikipedia pages, documentation, etc.
+- Smart Learn fetches and processes the content automatically.
+- No need to download or convert anything manually.
+
+### 4. 🃏 Quiz & Flashcard Generator
+- **From your content**: Auto-generate quizzes and flashcards based on uploaded files or pasted links.
+- **From any topic**: Enter any subject or topic to generate quizzes and flashcards on demand — no upload needed.
+- Flashcards with interactive flip animations for active recall practice.
+- Quizzes with instant feedback and detailed explanations for every answer.
 
 ---
 
 ## 💻 Tech Stack
 - **Framework**: Next.js (App Router)
-- **Styling**: Vanilla CSS (Premium Dark Mode, Glassmorphism, CSS Animations)
+- **Styling**: Vanilla CSS (Dark Mode, Glassmorphism, CSS Animations)
 - **Icons**: Lucide React
+- **AI**: Gemini API (document parsing, chat, quiz & flashcard generation)
+
+---
 
 ## 🚀 Getting Started
 
-First, install the dependencies to ensure everything runs smoothly:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Then, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the application in action.
+
+---
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page or submit a Pull Request.
