@@ -1,8 +1,8 @@
-# 🧠 Exam Brain 
+# 🧠 Smart Learn
 
 > **A comprehensive, AI-powered exam preparation engine for students and self-learners.**
 
-Exam Brain is a smart web application where students can upload their class notes, syllabi, or past papers and instantly receive structured study materials. Through an intuitive glassmorphic interface, the app generates interactive summaries, practice questions, visual mnemonics ("MemCodes"), and tracks your proficiency across different subjects over time.
+Smart Learn is a smart web application where students can upload their class notes, syllabi, or past papers and instantly receive structured study materials. Through an intuitive interface, the app generates interactive summaries and organizes your study content efficiently.
 
 ---
 
@@ -20,20 +20,6 @@ To provide a seamless, stress-free environment where unstructured study material
    - Converts messy notes into collapsible, structured summaries.
    - Intelligent bullet-point formatting with key terms highlighted in bold.
    - "Simplify further" options to break down complex topics.
-
-3. **Question Generator (`/question-generator`)**
-   - Simulated test environments based on previous year question papers.
-   - Immediate feedback styling on answered questions along with detailed explanations.
-
-4. **MemCode Generator ⭐ (`/memcode`)**
-   - Extracts key points from long answers to generate memorable acronym shortcuts.
-   - Saves MemCodes to a personal collection.
-   - Feature to generate associative AI mind-maps or images for topics to assist visual learners.
-
-5. **Weak Area Tracker (`/tracker`)**
-   - Performance analytics and mock exam logging.
-   - Topic-wise heatmap visualization (Red = Weak, Green = Strong).
-   - "Focus Topics" dashboard that dictates exactly what you need to review before exam day.
 
 ---
 
