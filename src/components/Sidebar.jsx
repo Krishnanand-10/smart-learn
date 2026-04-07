@@ -29,6 +29,8 @@ export default function Sidebar() {
     { name: 'Quiz', path: '/quiz', icon: ClipboardList },
   ];
 
+  if (pathname === '/') return null;
+
   return (
     <aside className="sidebar">
       <div className="logo-container">
