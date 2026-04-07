@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight, RotateCw, Link, FileText, Loader, Plus } from 'lucide-react';
 
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent`;
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 export default function Flashcards() {
   const [topic, setTopic] = useState('');
@@ -38,17 +38,19 @@ Return ONLY a valid JSON array with no markdown, no code fences, no extra text.
 Format: [{"front": "Question or term", "back": "Answer or definition"}, ...]`;
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+      const res = await fetch(OPENAI_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+          max_tokens: 2048
         }),
       });
       const data = await res.json();
-      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const raw = data?.choices?.[0]?.message?.content || '';
       const cleaned = raw.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(cleaned);
       if (!Array.isArray(parsed)) throw new Error('Invalid format');

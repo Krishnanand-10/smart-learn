@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Loader, Link, FileText, Film, Music, Trash2 } from 'lucide-react';
 
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent`;
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 function getContextInfo(content) {
   if (!content) return null;
@@ -65,21 +65,23 @@ AI:`;
     setLoading(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+      const res = await fetch(OPENAI_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: buildPrompt(trimmed) }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: buildPrompt(trimmed) }],
+          temperature: 0.7,
+          max_tokens: 1024
         }),
       });
 
       const data = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+      const reply = data?.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
       setMessages(prev => [...prev, { role: 'assistant', text: reply }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'error', text: 'Failed to reach Gemini API. Check your API key in .env.local.' }]);
+      setMessages(prev => [...prev, { role: 'error', text: 'Failed to reach OpenAI API. Check your API key in .env.local.' }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();

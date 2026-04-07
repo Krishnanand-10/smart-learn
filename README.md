@@ -43,7 +43,7 @@ To make studying effortless and interactive. Smart Learn lets you bring your lea
 - **Framework**: Next.js (App Router)
 - **Styling**: Vanilla CSS (Dark Mode, Glassmorphism, CSS Animations)
 - **Icons**: Lucide React
-- **AI**: Gemini API (document parsing, chat, quiz & flashcard generation)
+- **AI**: OpenAI API — `gpt-4o-mini` (chat, quiz & flashcard generation)
 
 ---
 
