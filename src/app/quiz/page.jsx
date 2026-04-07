@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, CheckCircle, XCircle, Link, FileText, Loader, ChevronRight, Trophy } from 'lucide-react';
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
 
 export default function Quiz() {
   const [topic, setTopic] = useState('');
@@ -43,30 +43,14 @@ Format: [{"question": "...", "options": ["A", "B", "C", "D"], "answer": "A", "ex
 The "answer" field must be exactly one of the option strings (not just a letter).`;
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-      if (!apiKey || apiKey === 'your_api_key_here') {
-        throw new Error('API key not configured. Please add your OpenAI API key to .env.local and restart the server.');
-      }
-      const res = await fetch(OPENAI_API_URL, {
+      const res = await fetch('/api/quiz', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.7,
-          max_tokens: 2048
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        const apiMsg = data?.error?.message || `HTTP ${res.status}`;
-        throw new Error(`OpenAI API error: ${apiMsg}`);
-      }
-      const raw = data?.choices?.[0]?.message?.content || '';
-      const cleaned = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(cleaned);
-      if (!Array.isArray(parsed)) throw new Error('Unexpected response format from AI. Please try again.');
-      setQuestions(parsed);
+      if (!res.ok) throw new Error(data?.error || 'API error');
+      setQuestions(data.questions);
     } catch (e) {
       setError(e.message || 'Failed to generate quiz. Please try again.');
     } finally {

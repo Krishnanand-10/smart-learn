@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Loader, Link, FileText, Film, Music, Trash2 } from 'lucide-react';
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
 
 function getContextInfo(content) {
   if (!content) return null;
@@ -65,23 +65,18 @@ AI:`;
     setLoading(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-      const res = await fetch(OPENAI_API_URL, {
+      const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: buildPrompt(trimmed) }],
-          temperature: 0.7,
-          max_tokens: 1024
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: buildPrompt(trimmed) }),
       });
 
       const data = await res.json();
-      const reply = data?.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
+      if (!res.ok) throw new Error(data?.error || 'API error');
+      const reply = data?.reply || 'Sorry, I could not generate a response.';
       setMessages(prev => [...prev, { role: 'assistant', text: reply }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'error', text: 'Failed to reach OpenAI API. Check your API key in .env.local.' }]);
+      setMessages(prev => [...prev, { role: 'error', text: err.message || 'Failed to reach the AI. Please try again.' }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();

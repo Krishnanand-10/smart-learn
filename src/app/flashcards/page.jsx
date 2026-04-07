@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight, RotateCw, Link, FileText, Loader, Plus } from 'lucide-react';
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
 
 export default function Flashcards() {
   const [topic, setTopic] = useState('');
@@ -38,25 +38,16 @@ Return ONLY a valid JSON array with no markdown, no code fences, no extra text.
 Format: [{"front": "Question or term", "back": "Answer or definition"}, ...]`;
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-      const res = await fetch(OPENAI_API_URL, {
+      const res = await fetch('/api/flashcards', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.7,
-          max_tokens: 2048
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
       });
       const data = await res.json();
-      const raw = data?.choices?.[0]?.message?.content || '';
-      const cleaned = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(cleaned);
-      if (!Array.isArray(parsed)) throw new Error('Invalid format');
-      setCards(parsed);
+      if (!res.ok) throw new Error(data?.error || 'API error');
+      setCards(data.cards);
     } catch (e) {
-      setError('Failed to generate flashcards. Try again or check your API key.');
+      setError(e.message || 'Failed to generate flashcards. Try again.');
     } finally {
       setLoading(false);
     }
