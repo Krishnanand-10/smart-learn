@@ -1,5 +1,5 @@
 import './globals.css';
-import Sidebar from '@/components/Sidebar';
+import TopNavbar from '@/components/TopNavbar';
 
 export const metadata = {
   title: 'Smart Learn',
@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <div className="app-layout">
-          <Sidebar />
+          <TopNavbar />
           {children}
         </div>
       </body>

@@ -23,6 +23,7 @@ export default function Sidebar() {
   };
 
   const navItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: Brain },
     { name: 'Input Hub', path: '/input-hub', icon: FileText },
     { name: 'AI Tutor Chat', path: '/chat', icon: MessageCircle },
     { name: 'Flashcards', path: '/flashcards', icon: CreditCard },

@@ -50,7 +50,7 @@ export default function Home() {
             </div>
             Smart Learn
           </div>
-          <Link href="/input-hub" style={{ 
+          <Link href="/dashboard" style={{ 
             background: 'rgba(255,255,255,0.05)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             padding: '0.5rem 1.25rem', 
@@ -98,7 +98,7 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <Link href="/input-hub" style={{
+            <Link href="/dashboard" style={{
               background: '#fbbf24',
               color: '#000000',
               fontWeight: 600,
@@ -111,7 +111,7 @@ export default function Home() {
             }}>
               Get Started
             </Link>
-            <Link href="/input-hub" style={{
+            <Link href="/dashboard" style={{
               background: 'transparent',
               color: '#ffffff',
               fontWeight: 500,
