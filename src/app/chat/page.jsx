@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader, Link, FileText, Film, Music, Trash2 } from 'lucide-react';
+import { Send, Bot, User, Loader, Link, FileText, Film, Music, Trash2, Paperclip, X } from 'lucide-react';
 
 
 
@@ -20,6 +20,7 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [savedContent, setSavedContent] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -34,7 +35,9 @@ export default function Chat() {
 
   const buildPrompt = (userMessage) => {
     let systemContext = '';
-    if (savedContent?.type === 'link') {
+    if (uploadedFile) {
+      systemContext = `The user has attached a document named "${uploadedFile.name}". Treat this as context.`;
+    } else if (savedContent?.type === 'link') {
       systemContext = `The user has provided this reference link: ${savedContent.url}. Use this as context if relevant to their question.`;
     } else if (savedContent?.type === 'file') {
       systemContext = `The user has uploaded a file named "${savedContent.name}" (type: ${savedContent.fileType}). Reference it when answering if relevant.`;
@@ -154,33 +157,76 @@ AI:`;
           <div ref={bottomRef} />
         </div>
 
-        {/* Input Bar */}
-        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button
-            title="Clear chat"
-            onClick={() => setMessages([{ role: 'assistant', text: "Hi! I'm your AI tutor. Ask me anything — about your uploaded content or any topic you're studying." }])}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}
-          >
-            <Trash2 size={18} />
-          </button>
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-            placeholder="Ask a question..."
-            style={{ flex: 1 }}
-            disabled={loading}
-          />
-          <button
-            className="btn-primary"
-            onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            style={{ flexShrink: 0, padding: '0.65rem' }}
-          >
-            {loading ? <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={18} />}
-          </button>
+        {/* Input Region */}
+        <div style={{ borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+          
+          {/* Attached File Pill */}
+          {uploadedFile && (
+            <div style={{ padding: '0.75rem 1.5rem 0 1.5rem', display: 'flex' }}>
+              <div style={{ 
+                display: 'flex', alignItems: 'center', gap: '0.5rem', 
+                background: 'var(--border-color)', padding: '0.4rem 0.75rem', 
+                borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-highlight)',
+                border: '1px solid var(--border-hover)'
+              }}>
+                <FileText size={14} color="var(--accent-color)" />
+                <span style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {uploadedFile.name}
+                </span>
+                <button 
+                  onClick={() => setUploadedFile(null)} 
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', marginLeft: '0.25rem' }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Input Bar */}
+          <div style={{ padding: '1rem 1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button
+              title="Clear chat"
+              onClick={() => {
+                setMessages([{ role: 'assistant', text: "Hi! I'm your AI tutor. Ask me anything — about your uploaded content or any topic you're studying." }]);
+                setUploadedFile(null);
+              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}
+            >
+              <Trash2 size={18} />
+            </button>
+            <label 
+              title="Upload Document"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}
+            >
+              <Paperclip size={18} />
+              <input 
+                type="file" 
+                style={{ display: 'none' }} 
+                onChange={(e) => {
+                  if (e.target.files[0]) setUploadedFile(e.target.files[0]);
+                }} 
+              />
+            </label>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder={uploadedFile ? `Ask about ${uploadedFile.name}...` : "Ask a question..."}
+              style={{ flex: 1 }}
+              disabled={loading}
+            />
+            <button
+              className="btn-primary"
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              style={{ flexShrink: 0, padding: '0.65rem' }}
+            >
+              {loading ? <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={18} />}
+            </button>
+          </div>
         </div>
       </div>
     </main>
