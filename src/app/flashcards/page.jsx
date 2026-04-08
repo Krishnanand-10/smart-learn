@@ -16,6 +16,8 @@ export default function FlashcardPage() {
           resourceName="Flashcard Deck"
           apiEndpoint="/api/flashcards"
           onGenerated={setGeneratedCards}
+          showQuestionCount={true}
+          countLabel="Number of Flashcards"
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '5vh' }}>

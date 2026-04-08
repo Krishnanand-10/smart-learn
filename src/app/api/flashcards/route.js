@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, questionCount } = await request.json();
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
+
+    // Default to a generous amount of cards if not provided, just in case
+    const countText = questionCount ? `exactly ${questionCount}` : `a high-yield, comprehensive set of`;
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -19,7 +22,7 @@ export async function POST(request) {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a highly intelligent study assistant. Your main task is to create high-yield, concise flashcards based on the user\'s input. Output ONLY a valid JSON object with a single key "flashcards" containing an array of objects. Each object must have a "question" string and an "answer" string. For example: { "flashcards": [{"question": "...", "answer": "..."}] }'
+            content: `You are a highly intelligent study assistant. Your main task is to create ${countText} concise flashcards based on the user's input. Output ONLY a valid JSON object with a single key "flashcards" containing an array of objects. Each object must have a "question" string and an "answer" string. For example: { "flashcards": [{"question": "...", "answer": "..."}] }`
           },
           { role: 'user', content: prompt }
         ],

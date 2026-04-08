@@ -3,18 +3,25 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
-export default function GenerationForm({ title, subtitle, resourceName, apiEndpoint, onGenerated, showQuestionCount = false }) {
+export default function GenerationForm({ title, subtitle, resourceName, apiEndpoint, onGenerated, showQuestionCount = false, countLabel = "Number of Questions" }) {
   const [activeTab, setActiveTab] = useState('upload'); // 'upload', 'subject', 'link'
   const [file, setFile] = useState(null);
   const [subjectText, setSubjectText] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [questionCount, setQuestionCount] = useState(5);
+  const [questionCount, setQuestionCount] = useState('');
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setErrorMsg('');
+    
+    // Validate question count if enabled
+    if (showQuestionCount && (!questionCount || Number(questionCount) < 1)) {
+      setErrorMsg(`Please enter the ${countLabel.toLowerCase()} you would like to generate.`);
+      setIsGenerating(false);
+      return;
+    }
     
     // Default fallback prompt if nothing is selected
     let prompt = "Provide a general 10-card deck about basic science.";
@@ -211,7 +218,7 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
           {showQuestionCount && (
             <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', background: '#121212', padding: '1rem', borderRadius: '8px', border: '1px solid #1f1f22' }}>
               <label style={{ color: '#ffffff', fontWeight: 600, fontSize: '0.95rem', flex: 1 }}>
-                Number of Questions
+                {countLabel}
               </label>
               <input 
                 type="number" 
