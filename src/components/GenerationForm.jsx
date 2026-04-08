@@ -46,19 +46,20 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
       
       if (!res.ok) throw new Error(data.error || 'Failed to generate content');
       
-      let finalCards = data.cards || data.data || data;
+      let parsedData = data.cards || data.data || data;
       
-      // Safety extraction if OpenAI wrapped it deeper randomly
-      if (finalCards?.flashcards && Array.isArray(finalCards.flashcards)) {
-        finalCards = finalCards.flashcards;
+      // Safety extraction specifically for older flashcard wrappers
+      if (parsedData?.flashcards && Array.isArray(parsedData.flashcards)) {
+        parsedData = parsedData.flashcards;
       }
       
-      if (!Array.isArray(finalCards) || finalCards.length === 0) {
+      // Validate that we got some structural data back, whether array or object
+      if (!parsedData || (Array.isArray(parsedData) && parsedData.length === 0)) {
         throw new Error('Received unexpected or empty format from AI.');
       }
       
       if (onGenerated) {
-        onGenerated(finalCards);
+        onGenerated(parsedData);
       }
     } catch (err) {
       setErrorMsg(err.message);
