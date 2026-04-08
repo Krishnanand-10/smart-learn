@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { Zap, ClipboardList, CreditCard, MessageCircle, FileText, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function Dashboard() {
-  const [userName, setUserName] = useState("Krishna Nandi");
+  const { data: session } = useSession();
+  const userName = session?.user?.name ? session.user.name.split(' ')[0] : 'Student';
 
   // Quick action cards
   const quickActions = [
@@ -32,7 +33,7 @@ export default function Dashboard() {
             Dashboard
           </h1>
           <p style={{ fontSize: '1.2rem', color: 'var(--text-subtle)' }}>
-            Welcome back {userName}!
+            Welcome back, {userName}!
           </p>
         </div>
 
