@@ -3,11 +3,61 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
-export default function GenerationForm({ title, subtitle, resourceName }) {
+export default function GenerationForm({ title, subtitle, resourceName, apiEndpoint, onGenerated }) {
   const [activeTab, setActiveTab] = useState('upload'); // 'upload', 'subject', 'link'
   const [file, setFile] = useState(null);
   const [subjectText, setSubjectText] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    setErrorMsg('');
+    
+    // Default fallback prompt if nothing is selected
+    let prompt = "Provide a general 10-card deck about basic science.";
+    
+    if (activeTab === 'subject' && subjectText.trim()) {
+      prompt = `Generate a ${resourceName} based on the following topic/subject: ${subjectText}`;
+    } else if (activeTab === 'link' && linkUrl.trim()) {
+      prompt = `Generate a ${resourceName} based on the contents behind this URL: ${linkUrl}`;
+    } else if (activeTab === 'upload' && file) {
+      prompt = `Generate a ${resourceName} based on the uploaded file named: ${file.name}. (Note: file parsing mock-up, assume basic context from name for now)`;
+    }
+
+    try {
+      const res = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await res.json();
+      console.log('API Response:', data);
+      
+      if (!res.ok) throw new Error(data.error || 'Failed to generate content');
+      
+      let finalCards = data.cards || data.data || data;
+      
+      // Safety extraction if OpenAI wrapped it deeper randomly
+      if (finalCards?.flashcards && Array.isArray(finalCards.flashcards)) {
+        finalCards = finalCards.flashcards;
+      }
+      
+      if (!Array.isArray(finalCards) || finalCards.length === 0) {
+        throw new Error('Received unexpected or empty format from AI.');
+      }
+      
+      if (onGenerated) {
+        onGenerated(finalCards);
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const tabs = [
     { id: 'upload', label: 'Upload' },
@@ -27,6 +77,11 @@ export default function GenerationForm({ title, subtitle, resourceName }) {
           <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.5 }}>
             {subtitle}
           </p>
+          {errorMsg && (
+            <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '8px', fontSize: '0.85rem' }}>
+              {errorMsg}
+            </div>
+          )}
         </div>
 
         {/* Compact Form Box */}
@@ -153,25 +208,29 @@ export default function GenerationForm({ title, subtitle, resourceName }) {
 
           {/* Footer Action */}
           <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-start' }}>
-            <button style={{
+            <button 
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              background: '#fbbf24',
-              color: '#000000',
+              background: isGenerating ? '#52525b' : '#fbbf24',
+              color: isGenerating ? '#a1a1aa' : '#000000',
               border: 'none',
               padding: '0.6rem 1.25rem',
               borderRadius: '6px',
               fontWeight: 600,
               fontSize: '0.95rem',
-              cursor: 'pointer',
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s',
-              boxShadow: '0 4px 14px 0 rgba(251, 191, 36, 0.39)'
+              boxShadow: isGenerating ? 'none' : '0 4px 14px 0 rgba(251, 191, 36, 0.39)'
             }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            onMouseEnter={e => { if (!isGenerating) e.currentTarget.style.transform = 'translateY(-1px)' }}
+            onMouseLeave={e => { if (!isGenerating) e.currentTarget.style.transform = 'translateY(0)' }}
             >
-              Continue <ArrowRight size={16} />
+              {isGenerating ? 'Generating...' : `Continue`} 
+              {!isGenerating && <ArrowRight size={16} />}
             </button>
           </div>
 
