@@ -1,9 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 
-export default function AuthModal({ isOpen, onClose }) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
+  const [mode, setMode] = useState(initialMode);
+
+  // Sync mode when modal opens with a different initialMode
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+    }
+  }, [isOpen, initialMode]);
+
   if (!isOpen) return null;
 
   return (
@@ -44,7 +53,7 @@ export default function AuthModal({ isOpen, onClose }) {
           marginBottom: '1rem',
           fontFamily: "var(--font-family, 'Inter', sans-serif)"
         }}>
-          Welcome back
+          {mode === 'login' ? 'Welcome back' : 'Create an account'}
         </h2>
         
         <p style={{
@@ -93,7 +102,27 @@ export default function AuthModal({ isOpen, onClose }) {
           fontSize: '0.9rem',
           color: '#a1a1aa'
         }}>
-          New to Smart Learn? <span style={{ color: '#ffffff', cursor: 'pointer', textDecoration: 'underline' }}>Sign Up</span>
+          {mode === 'login' ? (
+            <>
+              New to Smart Learn?{' '}
+              <span 
+                onClick={() => setMode('signup')}
+                style={{ color: '#ffffff', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Sign Up
+              </span>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <span 
+                onClick={() => setMode('login')}
+                style={{ color: '#ffffff', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Sign In
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -16,6 +16,12 @@ export default function Home() {
   ];
 
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+
+  const openAuth = (mode) => {
+    setAuthMode(mode);
+    setShowAuthModal(true);
+  };
 
   // Force a deeply engaging, dark base theme for the landing
   useEffect(() => {
@@ -53,7 +59,7 @@ export default function Home() {
             </div>
             Smart Learn
           </div>
-          <button onClick={() => setShowAuthModal(true)} style={{ 
+          <button onClick={() => openAuth('login')} style={{ 
             background: 'rgba(255,255,255,0.05)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             padding: '0.5rem 1.25rem', 
@@ -102,7 +108,7 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button onClick={() => setShowAuthModal(true)} style={{
+            <button onClick={() => openAuth('signup')} style={{
               background: '#fbbf24',
               color: '#000000',
               fontWeight: 600,
@@ -116,7 +122,7 @@ export default function Home() {
             }}>
               Get Started
             </button>
-            <button onClick={() => setShowAuthModal(true)} style={{
+            <button onClick={() => openAuth('signup')} style={{
               background: 'transparent',
               color: '#ffffff',
               fontWeight: 500,
@@ -193,7 +199,7 @@ export default function Home() {
         </div>
       </section>
 
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode={authMode} />
     </div>
   );
 }

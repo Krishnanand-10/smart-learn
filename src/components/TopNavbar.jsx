@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Brain, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function TopNavbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [theme, setTheme] = useState('dark-aurora');
 
   useEffect(() => {
@@ -104,15 +106,31 @@ export default function TopNavbar() {
           />
         </div>
         
-        <div style={{ 
-          width: '36px', height: '36px', 
-          borderRadius: '50%', 
-          background: 'linear-gradient(to bottom right, #f472b6, #db2777)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#ffffff', cursor: 'pointer'
-        }}>
-          <User size={18} />
-        </div>
+        <Link href="/profile" style={{ display: 'flex' }}>
+          {session?.user?.image ? (
+            <img 
+              src={session.user.image} 
+              alt="Profile Picture" 
+              style={{ 
+                width: '36px', height: '36px', 
+                borderRadius: '50%', 
+                objectFit: 'cover',
+                border: '2px solid var(--border-color)',
+                cursor: 'pointer'
+              }} 
+            />
+          ) : (
+            <div style={{ 
+              width: '36px', height: '36px', 
+              borderRadius: '50%', 
+              background: 'linear-gradient(to bottom right, #f472b6, #db2777)', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#ffffff', cursor: 'pointer'
+            }}>
+              <User size={18} />
+            </div>
+          )}
+        </Link>
       </div>
     </nav>
   );
