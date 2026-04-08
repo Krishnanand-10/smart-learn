@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
-export default function GenerationForm({ title, subtitle, resourceName, apiEndpoint, onGenerated }) {
+export default function GenerationForm({ title, subtitle, resourceName, apiEndpoint, onGenerated, showQuestionCount = false }) {
   const [activeTab, setActiveTab] = useState('upload'); // 'upload', 'subject', 'link'
   const [file, setFile] = useState(null);
   const [subjectText, setSubjectText] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [questionCount, setQuestionCount] = useState(5);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -19,18 +20,18 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
     let prompt = "Provide a general 10-card deck about basic science.";
     
     if (activeTab === 'subject' && subjectText.trim()) {
-      prompt = `Generate a ${resourceName} based on the following topic/subject: ${subjectText}`;
+      prompt = `Generate a ${questionCount}-question ${resourceName} based on the following topic/subject: ${subjectText}`;
     } else if (activeTab === 'link' && linkUrl.trim()) {
-      prompt = `Generate a ${resourceName} based on the contents behind this URL: ${linkUrl}`;
+      prompt = `Generate a ${questionCount}-question ${resourceName} based on the contents behind this URL: ${linkUrl}`;
     } else if (activeTab === 'upload' && file) {
-      prompt = `Generate a ${resourceName} based on the uploaded file named: ${file.name}. (Note: file parsing mock-up, assume basic context from name for now)`;
+      prompt = `Generate a ${questionCount}-question ${resourceName} based on the uploaded file named: ${file.name}.`;
     }
 
     try {
       const res = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, questionCount: showQuestionCount ? questionCount : undefined }),
       });
 
       const data = await res.json();
@@ -205,6 +206,33 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
             )}
 
           </div>
+
+          {/* Optional Question Count Form */}
+          {showQuestionCount && (
+            <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', background: '#121212', padding: '1rem', borderRadius: '8px', border: '1px solid #1f1f22' }}>
+              <label style={{ color: '#ffffff', fontWeight: 600, fontSize: '0.95rem', flex: 1 }}>
+                Number of Questions
+              </label>
+              <input 
+                type="number" 
+                min="1" 
+                max="30"
+                value={questionCount}
+                onChange={e => setQuestionCount(e.target.value)}
+                style={{ 
+                  width: '80px', 
+                  padding: '0.5rem', 
+                  background: '#0a0a0a', 
+                  border: '1px solid #333336', 
+                  color: '#fbbf24', 
+                  borderRadius: '6px', 
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '1rem'
+                }} 
+              />
+            </div>
+          )}
 
           {/* Footer Action */}
           <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-start' }}>
