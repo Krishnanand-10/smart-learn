@@ -1,5 +1,6 @@
 import './globals.css';
 import TopNavbar from '@/components/TopNavbar';
+import NextAuthProvider from '@/components/NextAuthProvider';
 
 export const metadata = {
   title: 'Smart Learn',
@@ -10,10 +11,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="app-layout">
-          <TopNavbar />
-          {children}
-        </div>
+        <NextAuthProvider>
+          <div className="app-layout">
+            <TopNavbar />
+            {children}
+          </div>
+        </NextAuthProvider>
       </body>
     </html>
   );

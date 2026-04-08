@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { Brain, Sparkles, MessageCircle, CreditCard, ClipboardList, Upload, Link as LinkIcon } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import AuthModal from '@/components/AuthModal';
 
 export default function Home() {
   const features = [
@@ -13,6 +14,8 @@ export default function Home() {
     { title: 'Upload Files', desc: 'Upload PDFs, videos, or audio. We instantly parse context and create a unified knowledge base.', icon: Upload, color: '#3b82f6' },
     { title: 'Paste Links', desc: 'Paste YouTube links or web articles—our engine handles the rest seamlessly.', icon: LinkIcon, color: '#ec4899' }
   ];
+
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Force a deeply engaging, dark base theme for the landing
   useEffect(() => {
@@ -50,7 +53,7 @@ export default function Home() {
             </div>
             Smart Learn
           </div>
-          <Link href="/dashboard" style={{ 
+          <button onClick={() => setShowAuthModal(true)} style={{ 
             background: 'rgba(255,255,255,0.05)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             padding: '0.5rem 1.25rem', 
@@ -59,7 +62,8 @@ export default function Home() {
             textDecoration: 'none', 
             fontSize: '0.9rem',
             fontWeight: 500,
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
           }}
           onMouseEnter={e => {
               e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
@@ -67,7 +71,7 @@ export default function Home() {
           onMouseLeave={e => {
               e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
           }}
-          >Sign In</Link>
+          >Sign In</button>
         </nav>
 
         {/* Hero Section Vertically Centered */}
@@ -98,27 +102,28 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <Link href="/dashboard" style={{
+            <button onClick={() => setShowAuthModal(true)} style={{
               background: '#fbbf24',
               color: '#000000',
               fontWeight: 600,
               padding: '0.65rem 1.75rem',
               borderRadius: '6px',
-              textDecoration: 'none',
+              border: 'none',
+              cursor: 'pointer',
               fontSize: '0.95rem',
               display: 'inline-flex',
               alignItems: 'center'
             }}>
               Get Started
-            </Link>
-            <Link href="/dashboard" style={{
+            </button>
+            <button onClick={() => setShowAuthModal(true)} style={{
               background: 'transparent',
               color: '#ffffff',
               fontWeight: 500,
               padding: '0.65rem 1.75rem',
               borderRadius: '6px',
               border: '1px solid rgba(255,255,255,0.15)',
-              textDecoration: 'none',
+              cursor: 'pointer',
               fontSize: '0.95rem',
               display: 'inline-flex',
               alignItems: 'center',
@@ -128,7 +133,7 @@ export default function Home() {
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               Sign Up
-            </Link>
+            </button>
           </div>
         </main>
       </div>
@@ -187,6 +192,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   );
 }
