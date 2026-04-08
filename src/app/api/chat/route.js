@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const { prompt } = await request.json();
+    const { messages } = await request.json();
 
-    if (!prompt) {
-      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: 'Valid messages array is required' }, { status: 400 });
     }
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -16,7 +16,7 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
+        messages: messages,
         temperature: 0.7,
         max_tokens: 1024,
       }),

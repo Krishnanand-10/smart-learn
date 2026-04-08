@@ -33,51 +33,50 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const buildPrompt = (userMessage) => {
-    let systemContext = '';
-    if (uploadedFile) {
-      systemContext = `The user has attached a document named "${uploadedFile.name}". Treat this as context.`;
-    } else if (savedContent?.type === 'link') {
-      systemContext = `The user has provided this reference link: ${savedContent.url}. Use this as context if relevant to their question.`;
-    } else if (savedContent?.type === 'file') {
-      systemContext = `The user has uploaded a file named "${savedContent.name}" (type: ${savedContent.fileType}). Reference it when answering if relevant.`;
-    }
-
-    const history = messages
-      .filter(m => m.role !== 'error')
-      .map(m => `${m.role === 'assistant' ? 'AI' : 'Student'}: ${m.text}`)
-      .join('\n');
-
-    return `You are a helpful AI tutor. Be concise, clear, and educational.
-${systemContext}
-
-Conversation so far:
-${history}
-
-Student: ${userMessage}
-AI:`;
-  };
-
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    const userMsg = { role: 'user', text: trimmed };
-    setMessages(prev => [...prev, userMsg]);
+    const newMessages = [...messages, { role: 'user', text: trimmed }];
+    setMessages(newMessages);
     setInput('');
     setLoading(true);
 
     try {
+      let systemContext = 'You are a helpful and extremely intelligent AI study tutor. Be concise, clear, and educational.';
+      
+      if (uploadedFile) {
+        if (uploadedFile.name.endsWith('.txt')) {
+          const text = await uploadedFile.text();
+          systemContext += `\n\nThe user has attached a document. Reference it heavily context:\n\n${text.substring(0, 15000)}`;
+        } else {
+          systemContext += `\n\nThe user has attached a file named "${uploadedFile.name}". (Note: file reading gracefully degraded to name-only due to format).`;
+        }
+      } else if (savedContent?.type === 'link') {
+        systemContext += `\n\nThe user has provided this reference link: ${savedContent.url}. Use this as context.`;
+      }
+
+      // Convert our UI message format into strict OpenAI format
+      const openAiMessages = [
+        { role: 'system', content: systemContext },
+        ...newMessages.filter(m => m.role !== 'error').map(m => ({
+          role: m.role,
+          content: m.text
+        }))
+      ];
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: buildPrompt(trimmed) }),
+        body: JSON.stringify({ messages: openAiMessages }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'API error');
+      
       const reply = data?.reply || 'Sorry, I could not generate a response.';
       setMessages(prev => [...prev, { role: 'assistant', text: reply }]);
+      
     } catch (err) {
       setMessages(prev => [...prev, { role: 'error', text: err.message || 'Failed to reach the AI. Please try again.' }]);
     } finally {
@@ -124,7 +123,7 @@ AI:`;
               {/* Avatar */}
               <div style={{
                 width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                background: msg.role === 'user' ? 'var(--accent-color)' : msg.role === 'error' ? '#ef4444' : 'var(--border-color)',
+                background: msg.role === 'user' ? '#3b82f6' : msg.role === 'error' ? '#ef4444' : 'var(--border-color)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
                 {msg.role === 'user' ? <User size={16} color="white" /> : <Bot size={16} color="var(--text-highlight)" />}
@@ -133,11 +132,11 @@ AI:`;
               <div style={{
                 maxWidth: '75%', padding: '0.75rem 1rem',
                 borderRadius: msg.role === 'user' ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
-                background: msg.role === 'user' ? 'var(--accent-color)' : msg.role === 'error' ? 'rgba(239,68,68,0.1)' : 'var(--panel-bg)',
-                border: '1px solid var(--border-color)',
-                color: msg.role === 'user' ? 'white' : msg.role === 'error' ? '#ef4444' : 'var(--text-highlight)',
+                background: msg.role === 'user' ? '#3b82f6' : msg.role === 'error' ? 'rgba(239,68,68,0.1)' : 'var(--panel-bg)',
+                border: '1px solid',
+                color: msg.role === 'user' ? '#ffffff' : msg.role === 'error' ? '#ef4444' : 'var(--text-highlight)',
                 fontSize: '0.9rem', lineHeight: '1.6', whiteSpace: 'pre-wrap',
-                borderColor: msg.role === 'error' ? '#ef4444' : 'var(--border-color)'
+                borderColor: msg.role === 'user' ? '#2563eb' : msg.role === 'error' ? '#ef4444' : 'var(--border-color)'
               }}>
                 {msg.text}
               </div>
