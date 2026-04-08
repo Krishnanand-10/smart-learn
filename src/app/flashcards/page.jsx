@@ -8,7 +8,7 @@ export default function FlashcardPage() {
   const [generatedCards, setGeneratedCards] = useState(null);
 
   return (
-    <div className="main-content">
+    <>
       {!generatedCards ? (
         <GenerationForm 
           title="Generate Flashcards"
@@ -20,7 +20,7 @@ export default function FlashcardPage() {
           countLabel="Number of Flashcards"
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '5vh' }}>
+        <div className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '5vh' }}>
           <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
             <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-highlight)' }}>
               Your Flashcards are Ready!
@@ -35,6 +35,6 @@ export default function FlashcardPage() {
           />
         </div>
       )}
-    </div>
+    </>
   );
 }
