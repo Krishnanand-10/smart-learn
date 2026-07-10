@@ -46,12 +46,21 @@ export default function Chat() {
       let systemContext = 'You are a helpful and extremely intelligent AI study tutor. Be concise, clear, and educational.';
       
       if (uploadedFile) {
-        if (uploadedFile.name.endsWith('.txt')) {
-          const text = await uploadedFile.text();
-          systemContext += `\n\nThe user has attached a document. Reference it heavily context:\n\n${text.substring(0, 15000)}`;
-        } else {
-          systemContext += `\n\nThe user has attached a file named "${uploadedFile.name}". (Note: file reading gracefully degraded to name-only due to format).`;
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', uploadedFile);
+
+        const parseRes = await fetch('/api/parse-file', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        const parseData = await parseRes.json();
+        if (!parseRes.ok) {
+          throw new Error(parseData.error || 'Failed to extract text from file.');
         }
+
+        const fileText = parseData.text || '';
+        systemContext += `\n\nThe user has attached a document named "${uploadedFile.name}". Reference it heavily context:\n\n${fileText.substring(0, 15000)}`;
       } else if (savedContent?.type === 'link') {
         systemContext += `\n\nThe user has provided this reference link: ${savedContent.url}. Use this as context.`;
       }

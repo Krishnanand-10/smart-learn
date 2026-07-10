@@ -23,18 +23,35 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
       return;
     }
     
-    // Default fallback prompt if nothing is selected
-    let prompt = "Provide a general 10-card deck about basic science.";
-    
-    if (activeTab === 'subject' && subjectText.trim()) {
-      prompt = `Generate a ${questionCount}-question ${resourceName} based on the following topic/subject: ${subjectText}`;
-    } else if (activeTab === 'link' && linkUrl.trim()) {
-      prompt = `Generate a ${questionCount}-question ${resourceName} based on the contents behind this URL: ${linkUrl}`;
-    } else if (activeTab === 'upload' && file) {
-      prompt = `Generate a ${questionCount}-question ${resourceName} based on the uploaded file named: ${file.name}.`;
-    }
-
     try {
+      let prompt = "Provide a general 10-card deck about basic science.";
+      
+      if (activeTab === 'subject' && subjectText.trim()) {
+        prompt = `Generate a ${questionCount}-question ${resourceName} based on the following topic/subject: ${subjectText}`;
+      } else if (activeTab === 'link' && linkUrl.trim()) {
+        prompt = `Generate a ${questionCount}-question ${resourceName} based on the contents behind this URL: ${linkUrl}`;
+      } else if (activeTab === 'upload' && file) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const parseRes = await fetch('/api/parse-file', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        const parseData = await parseRes.json();
+        if (!parseRes.ok) {
+          throw new Error(parseData.error || 'Failed to extract text from file.');
+        }
+
+        const fileText = parseData.text || '';
+        if (!fileText.trim()) {
+          throw new Error('The uploaded file did not contain any extractable text.');
+        }
+
+        prompt = `Generate a ${questionCount}-question ${resourceName} based on the following text content extracted from the file named "${file.name}":\n\n${fileText.substring(0, 15000)}`;
+      }
+
       const res = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
