@@ -8,34 +8,37 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const apiKey = process.env.GEMINI_API_KEY;
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are an expert academic summarizer. Your task is to analyze the user's input and provide a deeply synthesized summary. Output ONLY a valid JSON object with the following exact keys: "title" (a catchy title for the summary), "executiveSummary" (a concise 1-2 paragraph overview), "keyPoints" (an array of exactly 3-5 crucial bullet points summarizing core concepts), and "conclusion" (a single concluding sentence or takeaway). For example: { "title": "Biology 101", "executiveSummary": "...", "keyPoints": ["Point 1", "Point 2"], "conclusion": "..." }`
-          },
-          { role: 'user', content: prompt }
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }]
+          }
         ],
-        temperature: 0.5,
-        max_tokens: 2000,
-        response_format: { type: "json_object" }
+        systemInstruction: {
+          parts: [{ text: `You are an expert academic summarizer. Your task is to analyze the user's input and provide a deeply synthesized summary. Output ONLY a valid JSON object with the following exact keys: "title" (a catchy title for the summary), "executiveSummary" (a concise 1-2 paragraph overview), "keyPoints" (an array of exactly 3-5 crucial bullet points summarizing core concepts), and "conclusion" (a single concluding sentence or takeaway). For example: { "title": "Biology 101", "executiveSummary": "...", "keyPoints": ["Point 1", "Point 2"], "conclusion": "..." }` }]
+        },
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.5,
+          maxOutputTokens: 2000,
+        }
       }),
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      return NextResponse.json({ error: data?.error?.message || 'OpenAI error' }, { status: res.status });
+      return NextResponse.json({ error: data?.error?.message || 'Gemini error' }, { status: res.status });
     }
 
-    const raw = data?.choices?.[0]?.message?.content || '';
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const cleaned = raw.replace(/```(?:json)?|```/g, '').trim();
     let parsed;
     try {

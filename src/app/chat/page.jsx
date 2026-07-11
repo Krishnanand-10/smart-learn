@@ -13,6 +13,84 @@ function getContextInfo(content) {
   return { label: content.name, icon: FileText, color: '#ef4444' };
 }
 
+function formatInline(text) {
+  if (!text) return '';
+  const parts = [];
+  const boldItalicRegex = /(\*\*\*.*?\*\*\*)|(\*\*.*?\*\*)|(\*.*?\*)/g;
+  let match;
+  let lastIndex = 0;
+  
+  while ((match = boldItalicRegex.exec(text)) !== null) {
+    const matchText = match[0];
+    const matchIndex = match.index;
+    
+    if (matchIndex > lastIndex) {
+      parts.push(text.substring(lastIndex, matchIndex));
+    }
+    
+    if (matchText.startsWith('***') && matchText.endsWith('***')) {
+      parts.push(<strong key={matchIndex}><em>{matchText.slice(3, -3)}</em></strong>);
+    } else if (matchText.startsWith('**') && matchText.endsWith('**')) {
+      parts.push(<strong key={matchIndex}>{matchText.slice(2, -2)}</strong>);
+    } else if (matchText.startsWith('*') && matchText.endsWith('*')) {
+      parts.push(<em key={matchIndex}>{matchText.slice(1, -1)}</em>);
+    }
+    
+    lastIndex = boldItalicRegex.lastIndex;
+  }
+  
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+  
+  return parts.length > 0 ? parts : text;
+}
+
+function parseMarkdown(text) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  return lines.map((line, index) => {
+    let content = line;
+    
+    // Headers
+    const headerMatch = content.match(/^(#{1,6})\s+(.*)$/);
+    if (headerMatch) {
+      const level = headerMatch[1].length;
+      const textVal = headerMatch[2];
+      const Tag = `h${level}`;
+      const sizeMap = { h1: '1.4rem', h2: '1.2rem', h3: '1.05rem' };
+      return (
+        <Tag key={index} style={{ 
+          margin: '0.75rem 0 0.4rem 0', 
+          fontWeight: '700', 
+          fontSize: sizeMap[Tag] || '1rem',
+          color: 'var(--text-highlight)'
+        }}>
+          {formatInline(textVal)}
+        </Tag>
+      );
+    }
+    
+    // Bullet lists
+    const listMatch = content.match(/^[\*\-\+]\s+(.*)$/);
+    if (listMatch) {
+      return (
+        <ul key={index} style={{ margin: '0.2rem 0 0.2rem 1.2rem', paddingLeft: '0', listStyleType: 'disc' }}>
+          <li style={{ margin: '0.1rem 0' }}>{formatInline(listMatch[1])}</li>
+        </ul>
+      );
+    }
+    
+    // Empty line
+    if (!content.trim()) {
+      return <div key={index} style={{ height: '0.5rem' }} />;
+    }
+    
+    // Normal paragraph
+    return <p key={index} style={{ margin: '0.35rem 0' }}>{formatInline(content)}</p>;
+  });
+}
+
 export default function Chat() {
   const [messages, setMessages] = useState([
     { role: 'assistant', text: "Hi! I'm your AI tutor. Ask me anything — about your uploaded content or any topic you're studying." }
@@ -144,10 +222,10 @@ export default function Chat() {
                 background: msg.role === 'user' ? '#3b82f6' : msg.role === 'error' ? 'rgba(239,68,68,0.1)' : 'var(--panel-bg)',
                 border: '1px solid',
                 color: msg.role === 'user' ? '#ffffff' : msg.role === 'error' ? '#ef4444' : 'var(--text-highlight)',
-                fontSize: '0.9rem', lineHeight: '1.6', whiteSpace: 'pre-wrap',
+                fontSize: '0.9rem', lineHeight: '1.6',
                 borderColor: msg.role === 'user' ? '#2563eb' : msg.role === 'error' ? '#ef4444' : 'var(--border-color)'
               }}>
-                {msg.text}
+                {parseMarkdown(msg.text)}
               </div>
             </div>
           ))}

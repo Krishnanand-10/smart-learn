@@ -43,25 +43,54 @@ export async function POST(request) {
                     fileName.endsWith('.mpeg');
 
     if (isAudio || isVideo) {
-      const openAiFormData = new FormData();
-      openAiFormData.append('file', file, fileName);
-      openAiFormData.append('model', 'whisper-1');
-
-      const openAiRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: openAiFormData
-      });
-
-      const openAiData = await openAiRes.json();
-
-      if (!openAiRes.ok) {
-        return NextResponse.json({ error: openAiData?.error?.message || 'OpenAI Whisper API error' }, { status: openAiRes.status });
+      const arrayBuffer = await file.arrayBuffer();
+      const base64Data = Buffer.from(arrayBuffer).toString('base64');
+      
+      let mimeType = file.type || '';
+      if (!mimeType) {
+        if (fileName.endsWith('.mp3')) mimeType = 'audio/mp3';
+        else if (fileName.endsWith('.wav')) mimeType = 'audio/wav';
+        else if (fileName.endsWith('.m4a')) mimeType = 'audio/m4a';
+        else if (fileName.endsWith('.webm')) mimeType = 'audio/webm';
+        else if (fileName.endsWith('.mpga')) mimeType = 'audio/mpeg';
+        else if (fileName.endsWith('.mp4')) mimeType = 'video/mp4';
+        else if (fileName.endsWith('.mpeg')) mimeType = 'video/mpeg';
+        else mimeType = isAudio ? 'audio/mpeg' : 'video/mp4';
       }
 
-      return NextResponse.json({ text: openAiData.text || '' });
+      const apiKey = process.env.GEMINI_API_KEY;
+      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: base64Data
+                  }
+                },
+                {
+                  text: "Provide a detailed transcription of this audio/video. Output ONLY the transcription text, do not add any introduction or explanations."
+                }
+              ]
+            }
+          ]
+        })
+      });
+
+      const geminiData = await geminiRes.json();
+
+      if (!geminiRes.ok) {
+        return NextResponse.json({ error: geminiData?.error?.message || 'Gemini Audio API error' }, { status: geminiRes.status });
+      }
+
+      const transcription = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      return NextResponse.json({ text: transcription.trim() });
     }
 
     return NextResponse.json({ 
