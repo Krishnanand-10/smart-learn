@@ -115,17 +115,26 @@ export default function Chat() {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    const newMessages = [...messages, { role: 'user', text: trimmed }];
+    const fileToUpload = uploadedFile;
+    const newMessages = [
+      ...messages, 
+      { 
+        role: 'user', 
+        text: trimmed,
+        file: fileToUpload ? { name: fileToUpload.name, type: fileToUpload.type } : null
+      }
+    ];
     setMessages(newMessages);
     setInput('');
+    setUploadedFile(null);
     setLoading(true);
 
     try {
       let systemContext = 'You are a helpful and extremely intelligent AI study tutor. Be concise, clear, and educational.';
       
-      if (uploadedFile) {
+      if (fileToUpload) {
         const uploadFormData = new FormData();
-        uploadFormData.append('file', uploadedFile);
+        uploadFormData.append('file', fileToUpload);
 
         const parseRes = await fetch('/api/parse-file', {
           method: 'POST',
@@ -138,7 +147,7 @@ export default function Chat() {
         }
 
         const fileText = parseData.text || '';
-        systemContext += `\n\nThe user has attached a document named "${uploadedFile.name}". Reference it heavily context:\n\n${fileText.substring(0, 15000)}`;
+        systemContext += `\n\nThe user has attached a document named "${fileToUpload.name}". Reference it heavily context:\n\n${fileText.substring(0, 15000)}`;
       } else if (savedContent?.type === 'link') {
         systemContext += `\n\nThe user has provided this reference link: ${savedContent.url}. Use this as context.`;
       }
@@ -225,6 +234,25 @@ export default function Chat() {
                 fontSize: '0.9rem', lineHeight: '1.6',
                 borderColor: msg.role === 'user' ? '#2563eb' : msg.role === 'error' ? '#ef4444' : 'var(--border-color)'
               }}>
+                {msg.file && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: msg.role === 'user' ? 'rgba(255, 255, 255, 0.15)' : 'var(--border-color)',
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    marginBottom: '0.5rem',
+                    border: msg.role === 'user' ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid var(--border-hover)',
+                    color: msg.role === 'user' ? '#ffffff' : 'var(--text-highlight)'
+                  }}>
+                    <FileText size={14} color={msg.role === 'user' ? '#ffffff' : 'var(--accent-color)'} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
+                      {msg.file.name}
+                    </span>
+                  </div>
+                )}
                 {parseMarkdown(msg.text)}
               </div>
             </div>
