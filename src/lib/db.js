@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 
 const globalForPrisma = global;
 
@@ -8,8 +10,13 @@ const createPrismaClient = () => {
   const isPostgres = databaseUrl.startsWith('postgres:') || databaseUrl.startsWith('postgresql:');
 
   if (isPostgres) {
-    // PostgreSQL database connection (Supabase) is handled natively by Prisma Client
+    // PostgreSQL database connection (Supabase) using PG Driver Adapter
+    const pool = new pg.Pool({
+      connectionString: databaseUrl,
+    });
+    const adapter = new PrismaPg(pool);
     return new PrismaClient({
+      adapter,
       log: ['query', 'error', 'warn'],
     });
   } else {
