@@ -30,6 +30,7 @@ export default function TopNavbar() {
     { name: 'AI Tutors', path: '/chat' },
     { name: 'Quizzes', path: '/quiz' },
     { name: 'Summarize', path: '/input-hub' },
+    { name: 'My Library', path: '/library' },
   ];
 
   if (pathname === '/') return null;

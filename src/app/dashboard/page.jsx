@@ -4,9 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Zap, ClipboardList, CreditCard, MessageCircle, FileText, ArrowRight } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import QuizViewer from '@/components/QuizViewer';
-import SummaryViewer from '@/components/SummaryViewer';
-import FlashcardViewer from '@/components/FlashcardViewer';
 
 export default function Dashboard() {
   const { data: session } = useSession();
@@ -14,11 +11,6 @@ export default function Dashboard() {
 
   const [materials, setMaterials] = useState({ quizzes: [], summaries: [], flashcards: [] });
   const [loading, setLoading] = useState(true);
-
-  // Modal active viewers
-  const [viewQuiz, setViewQuiz] = useState(null);
-  const [viewSummary, setViewSummary] = useState(null);
-  const [viewFlashcards, setViewFlashcards] = useState(null);
 
   useEffect(() => {
     if (!session) return;
@@ -156,126 +148,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Saved Materials Section */}
-        <div>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 700, color: '#ffffff', marginBottom: '1.5rem' }}>
-            My Saved Materials
-          </h2>
-          
-          {loading ? (
-            <p style={{ color: 'var(--text-subtle)' }}>Loading materials...</p>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              
-              {/* Quizzes list */}
-              <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-highlight)', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                  Saved Quizzes ({materials.quizzes.length})
-                </h3>
-                {materials.quizzes.length === 0 ? (
-                  <p style={{ color: 'var(--text-subtle)', fontSize: '0.85rem' }}>No saved quizzes yet.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {materials.quizzes.map((q) => (
-                      <div 
-                        key={q.id} 
-                        onClick={() => setViewQuiz(q)}
-                        style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                      >
-                        <span style={{ fontSize: '0.9rem', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{q.title}</span>
-                        <ArrowRight size={14} color="var(--text-subtle)" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Summaries list */}
-              <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-highlight)', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                  Saved Summaries ({materials.summaries.length})
-                </h3>
-                {materials.summaries.length === 0 ? (
-                  <p style={{ color: 'var(--text-subtle)', fontSize: '0.85rem' }}>No saved summaries yet.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {materials.summaries.map((s) => (
-                      <div 
-                        key={s.id} 
-                        onClick={() => setViewSummary(s)}
-                        style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                      >
-                        <span style={{ fontSize: '0.9rem', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{s.title}</span>
-                        <ArrowRight size={14} color="var(--text-subtle)" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Flashcards list */}
-              <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-highlight)', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                  Saved Flashcards ({materials.flashcards.length})
-                </h3>
-                {materials.flashcards.length === 0 ? (
-                  <p style={{ color: 'var(--text-subtle)', fontSize: '0.85rem' }}>No saved flashcards yet.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {materials.flashcards.map((f) => (
-                      <div 
-                        key={f.id} 
-                        onClick={() => setViewFlashcards(f)}
-                        style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                      >
-                        <span style={{ fontSize: '0.9rem', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{f.title}</span>
-                        <ArrowRight size={14} color="var(--text-subtle)" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-            </div>
-          )}
-        </div>
-
       </div>
-
-      {/* Modal Overlays for saved items */}
-      {viewQuiz && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', padding: '2rem', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '800px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
-            <button onClick={() => setViewQuiz(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
-          </div>
-          <QuizViewer questions={viewQuiz.questions} isAlreadySaved={true} isReviewMode={true} onRestart={() => setViewQuiz(null)} />
-        </div>
-      )}
-
-      {viewSummary && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', padding: '2rem', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '800px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
-            <button onClick={() => setViewSummary(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
-          </div>
-          <SummaryViewer data={viewSummary} isAlreadySaved={true} />
-        </div>
-      )}
-
-      {viewFlashcards && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', padding: '2rem', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '700px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
-            <button onClick={() => setViewFlashcards(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
-          </div>
-          <FlashcardViewer cards={viewFlashcards.cards} isAlreadySaved={true} onFinish={() => setViewFlashcards(null)} />
-        </div>
-      )}
-
     </div>
   );
 }
