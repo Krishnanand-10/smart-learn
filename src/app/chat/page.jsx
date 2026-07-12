@@ -108,8 +108,41 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
+    const fetchChatHistory = async () => {
+      try {
+        const res = await fetch('/api/chat/history');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            setMessages(data.messages);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch chat history:', err);
+      }
+    };
+    fetchChatHistory();
+  }, []);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleClearChat = async () => {
+    if (window.confirm("Are you sure you want to clear your chat history?")) {
+      try {
+        const res = await fetch('/api/chat/history', { method: 'DELETE' });
+        if (res.ok) {
+          setMessages([
+            { role: 'assistant', text: "Hi! I'm your AI tutor. Ask me anything — about your uploaded content or any topic you're studying." }
+          ]);
+          setUploadedFile(null);
+        }
+      } catch (err) {
+        console.error('Failed to clear chat history:', err);
+      }
+    }
+  };
 
   const sendMessage = async () => {
     const trimmed = input.trim();
@@ -301,10 +334,7 @@ export default function Chat() {
           <div style={{ padding: '1rem 1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <button
               title="Clear chat"
-              onClick={() => {
-                setMessages([{ role: 'assistant', text: "Hi! I'm your AI tutor. Ask me anything — about your uploaded content or any topic you're studying." }]);
-                setUploadedFile(null);
-              }}
+              onClick={handleClearChat}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}
             >
               <Trash2 size={18} />

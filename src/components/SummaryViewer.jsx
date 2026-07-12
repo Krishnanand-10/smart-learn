@@ -1,9 +1,42 @@
-'use client';
-
+import { useState } from 'react';
 import { AlignLeft, CheckCircle2, ChevronRight, FileText } from 'lucide-react';
 
 export default function SummaryViewer({ data }) {
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
   if (!data) return null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/api/save-material', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'summary',
+          payload: {
+            title: data.title || 'Generated Summary',
+            prompt: '',
+            executiveSummary: data.executiveSummary,
+            keyPoints: data.keyPoints,
+            conclusion: data.conclusion
+          }
+        })
+      });
+
+      const dataJson = await res.json();
+      if (!res.ok) throw new Error(dataJson.error || 'Failed to save summary.');
+
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
@@ -27,6 +60,35 @@ export default function SummaryViewer({ data }) {
         <p style={{ color: 'var(--text-subtle)', fontSize: '0.95rem' }}>
           AI-generated synthesis
         </p>
+
+        {/* Save Actions */}
+        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+          <button 
+            onClick={handleSave}
+            disabled={saving || saved}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: saved ? 'rgba(16, 185, 129, 0.2)' : '#10b981',
+              color: saved ? '#10b981' : '#000000',
+              border: saved ? '1px solid #10b981' : 'none',
+              padding: '0.6rem 1.25rem',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: saving || saved ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            {saving ? 'Saving...' : saved ? 'Saved to Dashboard' : 'Save to Dashboard'}
+          </button>
+          {saveError && (
+            <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+              {saveError}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Main Content Layout */}

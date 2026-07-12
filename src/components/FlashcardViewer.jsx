@@ -6,6 +6,9 @@ import { ArrowLeft, ArrowRight, RotateCw, CheckCircle2 } from 'lucide-react';
 export default function FlashcardViewer({ cards, onFinish }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   if (!cards || cards.length === 0) return null;
 
@@ -26,6 +29,34 @@ export default function FlashcardViewer({ cards, onFinish }) {
   };
 
   const isLastCard = currentIndex === cards.length - 1;
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/api/save-material', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'flashcards',
+          payload: {
+            title: `Flashcards on ${new Date().toLocaleDateString()}`,
+            prompt: '',
+            cards: cards
+          }
+        })
+      });
+
+      const dataJson = await res.json();
+      if (!res.ok) throw new Error(dataJson.error || 'Failed to save flashcards.');
+
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{
@@ -115,61 +146,89 @@ export default function FlashcardViewer({ cards, onFinish }) {
         </div>
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
-        <button 
-          onClick={handlePrev} 
-          disabled={currentIndex === 0}
-          style={{
-            background: 'var(--bg-sidebar)',
-            border: '1px solid var(--border-color)',
-            color: currentIndex === 0 ? '#52525b' : '#ffffff',
-            padding: '0.85rem 1.5rem',
-            borderRadius: '12px',
-            cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
-            fontWeight: 600, transition: 'all 0.2s'
-          }}
-        >
-          <ArrowLeft size={18} /> Previous
-        </button>
-
-        {!isLastCard ? (
+      {/* Actions and Controls Wrapper */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', marginTop: '1rem' }}>
+        {/* Controls */}
+        <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
           <button 
-            onClick={handleNext} 
+            onClick={handlePrev} 
+            disabled={currentIndex === 0}
             style={{
-              background: '#ffffff',
-              border: 'none',
-              color: '#000000',
+              background: 'var(--bg-sidebar)',
+              border: '1px solid var(--border-color)',
+              color: currentIndex === 0 ? '#52525b' : '#ffffff',
               padding: '0.85rem 1.5rem',
               borderRadius: '12px',
-              cursor: 'pointer',
+              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', gap: '0.5rem',
               fontWeight: 600, transition: 'all 0.2s'
             }}
           >
-            Next <ArrowRight size={18} />
+            <ArrowLeft size={18} /> Previous
           </button>
-        ) : (
-          <button 
-            onClick={onFinish} 
-            style={{
-              background: '#10b981', // green finish
-              border: 'none',
-              color: '#ffffff',
-              padding: '0.85rem 1.5rem',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              fontWeight: 600, transition: 'all 0.2s',
-              boxShadow: '0 4px 14px 0 rgba(16, 185, 129, 0.39)'
-            }}
-          >
-            Finish Deck <CheckCircle2 size={18} />
-          </button>
+
+          {!isLastCard ? (
+            <button 
+              onClick={handleNext} 
+              style={{
+                background: '#ffffff',
+                border: 'none',
+                color: '#000000',
+                padding: '0.85rem 1.5rem',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                fontWeight: 600, transition: 'all 0.2s'
+              }}
+            >
+              Next <ArrowRight size={18} />
+            </button>
+          ) : (
+            <button 
+              onClick={onFinish} 
+              style={{
+                background: '#10b981', // green finish
+                border: 'none',
+                color: '#ffffff',
+                padding: '0.85rem 1.5rem',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                fontWeight: 600, transition: 'all 0.2s',
+                boxShadow: '0 4px 14px 0 rgba(16, 185, 129, 0.39)'
+              }}
+            >
+              Finish Deck <CheckCircle2 size={18} />
+            </button>
+          )}
+        </div>
+
+        {/* Save Deck Button */}
+        <button
+          onClick={handleSave}
+          disabled={saving || saved}
+          style={{
+            background: saved ? 'rgba(16, 185, 129, 0.2)' : '#10b981',
+            color: saved ? '#10b981' : '#000000',
+            border: saved ? '1px solid #10b981' : 'none',
+            padding: '0.65rem 1.5rem',
+            borderRadius: '12px',
+            cursor: saving || saved ? 'not-allowed' : 'pointer',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginTop: '0.5rem'
+          }}
+        >
+          {saving ? 'Saving Deck...' : saved ? 'Deck Saved to Dashboard' : 'Save Deck to Dashboard'}
+        </button>
+        {saveError && (
+          <p style={{ color: '#ef4444', fontSize: '0.85rem' }}>{saveError}</p>
         )}
       </div>
-
     </div>
   );
 }

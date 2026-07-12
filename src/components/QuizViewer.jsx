@@ -46,6 +46,38 @@ export default function QuizViewer({ questions, onRestart }) {
     return correct;
   };
 
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/api/save-material', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'quiz',
+          payload: {
+            title: `Quiz on ${new Date().toLocaleDateString()}`,
+            prompt: '',
+            questions: questions
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save quiz.');
+
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // If the quiz is finished and submitted
   if (isSubmitted) {
     const score = calculateScore();
@@ -72,7 +104,7 @@ export default function QuizViewer({ questions, onRestart }) {
             You scored {percentage}%. Let's review your answers below.
           </p>
         </div>
-
+ 
         {/* Review Answers */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {questions.map((q, i) => {
@@ -124,31 +156,57 @@ export default function QuizViewer({ questions, onRestart }) {
           })}
         </div>
         
-        {/* Restart Button */}
-        <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+        {/* Actions Button */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2.5rem' }}>
           <button 
             onClick={onRestart}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              background: '#ffffff',
-              color: '#000000',
-              border: 'none',
+              background: 'transparent',
+              color: '#ffffff',
+              border: '1px solid #1f1f22',
               padding: '0.75rem 1.5rem',
               borderRadius: '8px',
               fontWeight: 600,
               fontSize: '1rem',
               cursor: 'pointer',
-              transition: 'opacity 0.2s'
+              transition: 'all 0.2s'
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = 0.9}
-            onMouseLeave={e => e.currentTarget.style.opacity = 1}
+            onMouseEnter={e => e.currentTarget.style.borderColor = '#fbbf24'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = '#1f1f22'}
           >
             <RefreshCw size={18} />
             Generate Another Quiz
           </button>
+
+          <button 
+            onClick={handleSave}
+            disabled={saving || saved}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: saved ? 'rgba(16, 185, 129, 0.2)' : '#10b981',
+              color: saved ? '#10b981' : '#000000',
+              border: saved ? '1px solid #10b981' : 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: saving || saved ? 'not-allowed' : 'pointer',
+              transition: 'opacity 0.2s'
+            }}
+          >
+            {saving ? 'Saving...' : saved ? 'Saved to Dashboard' : 'Save to Dashboard'}
+          </button>
         </div>
+        {saveError && (
+          <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '0.9rem', marginTop: '1rem' }}>
+            {saveError}
+          </p>
+        )}
       </div>
     );
   }

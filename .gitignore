@@ -35,3 +35,7 @@ next-env.d.ts
 
 # Learning notes (ignored)
 LEARNING_LOG.md
+
+# SQLite database
+/prisma/*.db
+/prisma/*.db-journal

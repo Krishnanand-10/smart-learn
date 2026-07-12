@@ -1,11 +1,33 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user || !session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized. Please sign in.' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     const { messages } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Valid messages array is required' }, { status: 400 });
+    }
+
+    // Save the new user message to the database
+    const lastUserMsg = messages[messages.length - 1];
+    if (lastUserMsg && lastUserMsg.role === 'user') {
+      await prisma.chatMessage.create({
+        data: {
+          userId,
+          role: 'user',
+          text: lastUserMsg.content,
+        },
+      });
     }
 
     const systemMessage = messages.find(m => m.role === 'system');
@@ -57,6 +79,16 @@ export async function POST(request) {
     }
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+
+    // Save the generated assistant reply to the database
+    await prisma.chatMessage.create({
+      data: {
+        userId,
+        role: 'assistant',
+        text: reply,
+      },
+    });
+
     return NextResponse.json({ reply });
   } catch (err) {
     console.error('Chat API Error:', err);
