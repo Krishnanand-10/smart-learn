@@ -254,7 +254,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '800px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
             <button onClick={() => setViewQuiz(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
           </div>
-          <QuizViewer questions={viewQuiz.questions} isAlreadySaved={true} onRestart={() => setViewQuiz(null)} />
+          <QuizViewer questions={viewQuiz.questions} isAlreadySaved={true} isReviewMode={true} onRestart={() => setViewQuiz(null)} />
         </div>
       )}
 

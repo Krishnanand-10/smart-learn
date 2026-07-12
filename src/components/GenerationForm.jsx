@@ -75,6 +75,11 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
         throw new Error('Received unexpected or empty format from AI.');
       }
       
+      // Attach the auto-saved database record ID to the data
+      if (data.id) {
+        parsedData.id = data.id;
+      }
+      
       if (onGenerated) {
         onGenerated(parsedData);
       }

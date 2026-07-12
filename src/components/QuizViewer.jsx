@@ -3,10 +3,19 @@
 import { useState } from 'react';
 import { CheckCircle, XCircle, ChevronRight, ChevronLeft, RefreshCw } from 'lucide-react';
 
-export default function QuizViewer({ questions, onRestart, isAlreadySaved = false }) {
+export default function QuizViewer({ questions, onRestart, isAlreadySaved = false, isReviewMode = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [answers, setAnswers] = useState(() => {
+    if (isReviewMode) {
+      const prefilled = {};
+      questions.forEach((q, i) => {
+        prefilled[i] = q.correctAnswer;
+      });
+      return prefilled;
+    }
+    return {};
+  });
+  const [isSubmitted, setIsSubmitted] = useState(isReviewMode);
 
   // If no questions are provided somehow
   if (!questions || questions.length === 0) {
