@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CheckCircle, XCircle, ChevronRight, ChevronLeft, RefreshCw } from 'lucide-react';
 
-export default function QuizViewer({ questions, onRestart }) {
+export default function QuizViewer({ questions, onRestart, isAlreadySaved = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -47,7 +47,7 @@ export default function QuizViewer({ questions, onRestart }) {
   };
 
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(isAlreadySaved || !!questions.id);
   const [saveError, setSaveError] = useState(null);
 
   const handleSave = async () => {
@@ -181,26 +181,40 @@ export default function QuizViewer({ questions, onRestart }) {
             Generate Another Quiz
           </button>
 
-          <button 
-            onClick={handleSave}
-            disabled={saving || saved}
-            style={{
+          {!saved ? (
+            <button 
+              onClick={handleSave}
+              disabled={saving}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: '#10b981',
+                color: '#000000',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                transition: 'opacity 0.2s'
+              }}
+            >
+              {saving ? 'Saving...' : 'Save to Dashboard'}
+            </button>
+          ) : (
+            <div style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              background: saved ? 'rgba(16, 185, 129, 0.2)' : '#10b981',
-              color: saved ? '#10b981' : '#000000',
-              border: saved ? '1px solid #10b981' : 'none',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
+              gap: '0.4rem',
+              color: '#10b981',
               fontWeight: 600,
               fontSize: '1rem',
-              cursor: saving || saved ? 'not-allowed' : 'pointer',
-              transition: 'opacity 0.2s'
-            }}
-          >
-            {saving ? 'Saving...' : saved ? 'Saved to Dashboard' : 'Save to Dashboard'}
-          </button>
+              padding: '0.75rem 1.5rem',
+            }}>
+              Saved to Dashboard ✓
+            </div>
+          )}
         </div>
         {saveError && (
           <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '0.9rem', marginTop: '1rem' }}>

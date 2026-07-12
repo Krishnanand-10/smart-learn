@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, CheckCircle2 } from 'lucide-react';
 
-export default function FlashcardViewer({ cards, onFinish }) {
+export default function FlashcardViewer({ cards, onFinish, isAlreadySaved = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(isAlreadySaved || !!cards.id);
   const [saveError, setSaveError] = useState(null);
 
   if (!cards || cards.length === 0) return null;
@@ -204,27 +204,42 @@ export default function FlashcardViewer({ cards, onFinish }) {
         </div>
 
         {/* Save Deck Button */}
-        <button
-          onClick={handleSave}
-          disabled={saving || saved}
-          style={{
-            background: saved ? 'rgba(16, 185, 129, 0.2)' : '#10b981',
-            color: saved ? '#10b981' : '#000000',
-            border: saved ? '1px solid #10b981' : 'none',
-            padding: '0.65rem 1.5rem',
-            borderRadius: '12px',
-            cursor: saving || saved ? 'not-allowed' : 'pointer',
+        {!saved ? (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              background: '#10b981',
+              color: '#000000',
+              border: 'none',
+              padding: '0.65rem 1.5rem',
+              borderRadius: '12px',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginTop: '0.5rem'
+            }}
+          >
+            {saving ? 'Saving Deck...' : 'Save Deck to Dashboard'}
+          </button>
+        ) : (
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            color: '#10b981',
             fontWeight: 600,
             fontSize: '0.9rem',
-            transition: 'all 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
+            padding: '0.65rem 1.5rem',
             marginTop: '0.5rem'
-          }}
-        >
-          {saving ? 'Saving Deck...' : saved ? 'Deck Saved to Dashboard' : 'Save Deck to Dashboard'}
-        </button>
+          }}>
+            Deck Saved to Dashboard ✓
+          </div>
+        )}
         {saveError && (
           <p style={{ color: '#ef4444', fontSize: '0.85rem' }}>{saveError}</p>
         )}

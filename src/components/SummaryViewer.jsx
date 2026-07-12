@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { AlignLeft, CheckCircle2, ChevronRight, FileText } from 'lucide-react';
 
-export default function SummaryViewer({ data }) {
+export default function SummaryViewer({ data, isAlreadySaved = false }) {
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(isAlreadySaved || !!data.id);
   const [saveError, setSaveError] = useState(null);
 
   if (!data) return null;
@@ -63,26 +63,40 @@ export default function SummaryViewer({ data }) {
 
         {/* Save Actions */}
         <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-          <button 
-            onClick={handleSave}
-            disabled={saving || saved}
-            style={{
+          {!saved ? (
+            <button 
+              onClick={handleSave}
+              disabled={saving}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: '#10b981',
+                color: '#000000',
+                border: 'none',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {saving ? 'Saving...' : 'Save to Dashboard'}
+            </button>
+          ) : (
+            <div style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              background: saved ? 'rgba(16, 185, 129, 0.2)' : '#10b981',
-              color: saved ? '#10b981' : '#000000',
-              border: saved ? '1px solid #10b981' : 'none',
-              padding: '0.6rem 1.25rem',
-              borderRadius: '8px',
+              gap: '0.4rem',
+              color: '#10b981',
               fontWeight: 600,
               fontSize: '0.9rem',
-              cursor: saving || saved ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            {saving ? 'Saving...' : saved ? 'Saved to Dashboard' : 'Save to Dashboard'}
-          </button>
+              padding: '0.6rem 1.25rem',
+            }}>
+              Saved to Dashboard ✓
+            </div>
+          )}
           {saveError && (
             <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.5rem' }}>
               {saveError}

@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function POST(request) {
   try {
@@ -52,7 +55,26 @@ export async function POST(request) {
 
     if (!Array.isArray(parsed)) throw new Error('Invalid format returned by AI: ' + raw);
 
-    return NextResponse.json({ data: parsed });
+    // Auto-save to Supabase if user is logged in
+    let savedId = null;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id) {
+      try {
+        const newQuiz = await prisma.quiz.create({
+          data: {
+            userId: session.user.id,
+            title: `Quiz on ${new Date().toLocaleDateString()}`,
+            prompt: prompt ? prompt.substring(0, 500) : '',
+            questionsJson: JSON.stringify(parsed),
+          },
+        });
+        savedId = newQuiz.id;
+      } catch (saveErr) {
+        console.error('Failed to auto-save generated quiz:', saveErr);
+      }
+    }
+
+    return NextResponse.json({ data: parsed, id: savedId });
   } catch (err) {
     console.error('Quiz API Error:', err);
     return NextResponse.json({ error: err.message || 'Failed to generate quiz' }, { status: 500 });

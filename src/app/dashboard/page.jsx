@@ -179,7 +179,7 @@ export default function Dashboard() {
                     {materials.quizzes.map((q) => (
                       <div 
                         key={q.id} 
-                        onClick={() => setViewQuiz(q.questions)}
+                        onClick={() => setViewQuiz(q)}
                         style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
                         onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
                         onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
@@ -229,7 +229,7 @@ export default function Dashboard() {
                     {materials.flashcards.map((f) => (
                       <div 
                         key={f.id} 
-                        onClick={() => setViewFlashcards(f.cards)}
+                        onClick={() => setViewFlashcards(f)}
                         style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
                         onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
                         onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
@@ -254,7 +254,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '800px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
             <button onClick={() => setViewQuiz(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
           </div>
-          <QuizViewer questions={viewQuiz} onRestart={() => setViewQuiz(null)} />
+          <QuizViewer questions={viewQuiz.questions} isAlreadySaved={true} onRestart={() => setViewQuiz(null)} />
         </div>
       )}
 
@@ -263,7 +263,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '800px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
             <button onClick={() => setViewSummary(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
           </div>
-          <SummaryViewer data={viewSummary} />
+          <SummaryViewer data={viewSummary} isAlreadySaved={true} />
         </div>
       )}
 
@@ -272,7 +272,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '700px', margin: '0 auto', width: '100%', marginBottom: '1rem' }}>
             <button onClick={() => setViewFlashcards(null)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Close Viewer</button>
           </div>
-          <FlashcardViewer cards={viewFlashcards} onFinish={() => setViewFlashcards(null)} />
+          <FlashcardViewer cards={viewFlashcards.cards} isAlreadySaved={true} onFinish={() => setViewFlashcards(null)} />
         </div>
       )}
 

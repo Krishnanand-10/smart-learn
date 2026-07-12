@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function POST(request) {
   try {
@@ -58,7 +61,26 @@ export async function POST(request) {
       throw new Error('AI returned an unexpected object structure: ' + raw);
     }
 
-    return NextResponse.json({ cards: parsed });
+    // Auto-save to Supabase if user is logged in
+    let savedId = null;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id) {
+      try {
+        const newFlashcardSet = await prisma.flashcardSet.create({
+          data: {
+            userId: session.user.id,
+            title: `Flashcards on ${new Date().toLocaleDateString()}`,
+            prompt: prompt ? prompt.substring(0, 500) : '',
+            cardsJson: JSON.stringify(parsed),
+          },
+        });
+        savedId = newFlashcardSet.id;
+      } catch (saveErr) {
+        console.error('Failed to auto-save generated flashcard set:', saveErr);
+      }
+    }
+
+    return NextResponse.json({ cards: parsed, id: savedId });
   } catch (err) {
     console.error('Flashcards Route Error:', err.message);
     return NextResponse.json({ error: err.message || 'Failed to generate flashcards' }, { status: 500 });

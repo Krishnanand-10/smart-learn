@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function POST(request) {
   try {
@@ -51,7 +54,28 @@ export async function POST(request) {
       throw new Error('Invalid format returned by AI: missing required structure.');
     }
 
-    return NextResponse.json({ data: parsed });
+    // Auto-save to Supabase if user is logged in
+    let savedId = null;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id) {
+      try {
+        const newSummary = await prisma.summary.create({
+          data: {
+            userId: session.user.id,
+            title: parsed.title || 'Generated Summary',
+            prompt: prompt ? prompt.substring(0, 500) : '',
+            executiveSummary: parsed.executiveSummary || '',
+            keyPointsJson: JSON.stringify(parsed.keyPoints || []),
+            conclusion: parsed.conclusion || '',
+          },
+        });
+        savedId = newSummary.id;
+      } catch (saveErr) {
+        console.error('Failed to auto-save generated summary:', saveErr);
+      }
+    }
+
+    return NextResponse.json({ data: parsed, id: savedId });
   } catch (err) {
     console.error('Summarize API Error:', err);
     return NextResponse.json({ error: err.message || 'Failed to generate summary' }, { status: 500 });
