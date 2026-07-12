@@ -26,6 +26,7 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
     try {
       let prompt = "Provide a general 10-card deck about basic science.";
       
+      let fileTextContent = '';
       if (activeTab === 'subject' && subjectText.trim()) {
         prompt = `Generate a ${questionCount}-question ${resourceName} based on the following topic/subject: ${subjectText}`;
       } else if (activeTab === 'link' && linkUrl.trim()) {
@@ -48,6 +49,7 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
         if (!fileText.trim()) {
           throw new Error('The uploaded file did not contain any extractable text.');
         }
+        fileTextContent = fileText;
 
         prompt = `Generate a ${questionCount}-question ${resourceName} based on the following text content extracted from the file named "${file.name}":\n\n${fileText.substring(0, 15000)}`;
       }
@@ -78,6 +80,27 @@ export default function GenerationForm({ title, subtitle, resourceName, apiEndpo
       // Attach the auto-saved database record ID to the data
       if (data.id) {
         parsedData.id = data.id;
+      }
+
+      // Save the active study session content to local storage for shared contexts (like AI Tutors)
+      if (activeTab === 'upload' && file) {
+        localStorage.setItem('smartLearn_content', JSON.stringify({
+          type: 'file',
+          name: file.name,
+          text: fileTextContent
+        }));
+      } else if (activeTab === 'subject') {
+        localStorage.setItem('smartLearn_content', JSON.stringify({
+          type: 'subject',
+          name: subjectText,
+          text: subjectText
+        }));
+      } else if (activeTab === 'link') {
+        localStorage.setItem('smartLearn_content', JSON.stringify({
+          type: 'link',
+          url: linkUrl,
+          name: linkUrl
+        }));
       }
       
       if (onGenerated) {

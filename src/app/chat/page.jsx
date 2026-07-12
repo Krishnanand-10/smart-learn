@@ -181,8 +181,14 @@ export default function Chat() {
 
         const fileText = parseData.text || '';
         systemContext += `\n\nThe user has attached a document named "${fileToUpload.name}". Reference it heavily context:\n\n${fileText.substring(0, 15000)}`;
-      } else if (savedContent?.type === 'link') {
-        systemContext += `\n\nThe user has provided this reference link: ${savedContent.url}. Use this as context.`;
+      } else if (savedContent) {
+        if (savedContent.type === 'link' && savedContent.url) {
+          systemContext += `\n\nThe user has provided this reference link: ${savedContent.url}. Use this as context.`;
+        } else if (savedContent.type === 'file' && savedContent.text) {
+          systemContext += `\n\nThe user has previously uploaded a document named "${savedContent.name}". Reference it heavily context:\n\n${savedContent.text.substring(0, 15000)}`;
+        } else if (savedContent.type === 'subject' && savedContent.text) {
+          systemContext += `\n\nThe user is studying the topic: "${savedContent.name}". Use this as context.`;
+        }
       }
 
       // Convert our UI message format into strict OpenAI format
