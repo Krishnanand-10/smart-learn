@@ -94,11 +94,26 @@ export async function POST(request) {
     }
 
     return NextResponse.json({ 
-      error: `Unsupported file format: "${fileName}". Please upload a text, PDF, audio, or video file.` 
+      error: `Invalid document type. We cannot read "${fileName}". Please upload a standard PDF, text, audio, or video file.` 
     }, { status: 400 });
 
   } catch (error) {
     console.error('File parsing API error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error during file parsing' }, { status: 500 });
+    
+    let originalError = error.message || '';
+    const lowerMessage = originalError.toLowerCase();
+    
+    // Default friendly fallback message
+    let cleanMessage = 'We were unable to access or read this file. Please check that the file is not corrupted and try again.';
+    
+    if (lowerMessage.includes('password') || lowerMessage.includes('decrypt') || lowerMessage.includes('encrypted')) {
+      cleanMessage = 'We cannot access this file because it is password-protected or locked. Please upload an unlocked version.';
+    } else if (lowerMessage.includes('format') || lowerMessage.includes('invalid pdf') || lowerMessage.includes('corrupt')) {
+      cleanMessage = 'Invalid document format. We are unable to parse the contents of this file. Please check the file and try again.';
+    } else if (lowerMessage.includes('large') || lowerMessage.includes('limit') || lowerMessage.includes('eof')) {
+      cleanMessage = 'This file is too large or incomplete. Please try uploading a smaller file.';
+    }
+    
+    return NextResponse.json({ error: cleanMessage }, { status: 500 });
   }
 }
