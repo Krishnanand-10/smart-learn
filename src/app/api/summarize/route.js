@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { callGemini } from '@/lib/gemini';
 
 export async function POST(request) {
   try {
@@ -11,35 +12,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }]
-          }
-        ],
-        systemInstruction: {
-          parts: [{ text: `You are an expert academic summarizer. Your task is to analyze the user's input and provide a deeply synthesized summary. Output ONLY a valid JSON object with the following exact keys: "title" (a catchy title for the summary), "executiveSummary" (a concise 1-2 paragraph overview), "keyPoints" (an array of exactly 3-5 crucial bullet points summarizing core concepts), and "conclusion" (a single concluding sentence or takeaway). For example: { "title": "Biology 101", "executiveSummary": "...", "keyPoints": ["Point 1", "Point 2"], "conclusion": "..." }` }]
-        },
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.5,
-          maxOutputTokens: 2000,
+    const { data } = await callGemini({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
         }
-      }),
+      ],
+      systemInstruction: {
+        parts: [{ text: `You are an expert academic summarizer. Your task is to analyze the user's input and provide a deeply synthesized summary. Output ONLY a valid JSON object with the following exact keys: "title" (a catchy title for the summary), "executiveSummary" (a concise 1-2 paragraph overview), "keyPoints" (an array of exactly 3-5 crucial bullet points summarizing core concepts), and "conclusion" (a single concluding sentence or takeaway). For example: { "title": "Biology 101", "executiveSummary": "...", "keyPoints": ["Point 1", "Point 2"], "conclusion": "..." }` }]
+      },
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.5,
+        maxOutputTokens: 2000,
+      }
     });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      return NextResponse.json({ error: data?.error?.message || 'Gemini error' }, { status: res.status });
-    }
 
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const cleaned = raw.replace(/```(?:json)?|```/g, '').trim();
@@ -78,6 +66,6 @@ export async function POST(request) {
     return NextResponse.json({ data: parsed, id: savedId });
   } catch (err) {
     console.error('Summarize API Error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to generate summary' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to generate summary' }, { status: err.status || 500 });
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createRequire } from 'module';
+import { callGemini } from '@/lib/gemini';
 const require = createRequire(import.meta.url);
 require('pdf-parse/worker');
 const { PDFParse } = require('pdf-parse');
@@ -58,36 +59,23 @@ export async function POST(request) {
         else mimeType = isAudio ? 'audio/mpeg' : 'video/mp4';
       }
 
-      const apiKey = process.env.GEMINI_API_KEY;
-      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: mimeType,
-                    data: base64Data
-                  }
-                },
-                {
-                  text: "Provide a detailed transcription of this audio/video. Output ONLY the transcription text, do not add any introduction or explanations."
+      const { data: geminiData } = await callGemini({
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data
                 }
-              ]
-            }
-          ]
-        })
+              },
+              {
+                text: "Provide a detailed transcription of this audio/video. Output ONLY the transcription text, do not add any introduction or explanations."
+              }
+            ]
+          }
+        ]
       });
-
-      const geminiData = await geminiRes.json();
-
-      if (!geminiRes.ok) {
-        return NextResponse.json({ error: geminiData?.error?.message || 'Gemini Audio API error' }, { status: geminiRes.status });
-      }
 
       const transcription = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
       return NextResponse.json({ text: transcription.trim() });

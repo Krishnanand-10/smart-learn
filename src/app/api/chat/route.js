@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { callGemini } from '@/lib/gemini';
 
 export async function POST(request) {
   try {
@@ -56,27 +57,14 @@ export async function POST(request) {
       chatContents.unshift({ role: 'user', parts: [{ text: 'Hello' }] });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: chatContents,
-        systemInstruction: systemInstruction,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1024,
-        }
-      }),
+    const { data } = await callGemini({
+      contents: chatContents,
+      systemInstruction: systemInstruction,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+      }
     });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      return NextResponse.json({ error: data?.error?.message || 'Gemini API error' }, { status: res.status });
-    }
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
 
@@ -92,6 +80,6 @@ export async function POST(request) {
     return NextResponse.json({ reply });
   } catch (err) {
     console.error('Chat API Error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: err.status || 500 });
   }
 }

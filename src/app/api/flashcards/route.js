@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { callGemini } from '@/lib/gemini';
 
 export async function POST(request) {
   try {
@@ -14,35 +15,22 @@ export async function POST(request) {
     // Default to a generous amount of cards if not provided, just in case
     const countText = questionCount ? `exactly ${questionCount}` : `a high-yield, comprehensive set of`;
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }]
-          }
-        ],
-        systemInstruction: {
-          parts: [{ text: `You are a highly intelligent study assistant. Your main task is to create ${countText} concise flashcards based on the user's input. Output ONLY a valid JSON object with a single key "flashcards" containing an array of objects. Each object must have a "question" string and an "answer" string. For example: { "flashcards": [{"question": "...", "answer": "..."}] }` }]
-        },
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.7,
-          maxOutputTokens: 2048,
+    const { data } = await callGemini({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
         }
-      }),
+      ],
+      systemInstruction: {
+        parts: [{ text: `You are a highly intelligent study assistant. Your main task is to create ${countText} concise flashcards based on the user's input. Output ONLY a valid JSON object with a single key "flashcards" containing an array of objects. Each object must have a "question" string and an "answer" string. For example: { "flashcards": [{"question": "...", "answer": "..."}] }` }]
+      },
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.7,
+        maxOutputTokens: 2048,
+      }
     });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      return NextResponse.json({ error: data?.error?.message || 'Gemini error' }, { status: res.status });
-    }
 
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const cleaned = raw.replace(/```(?:json)?|```/g, '').trim();
@@ -83,6 +71,6 @@ export async function POST(request) {
     return NextResponse.json({ cards: parsed, id: savedId });
   } catch (err) {
     console.error('Flashcards Route Error:', err.message);
-    return NextResponse.json({ error: err.message || 'Failed to generate flashcards' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to generate flashcards' }, { status: err.status || 500 });
   }
 }
