@@ -134,67 +134,25 @@ export default function Home() {
             </div>
             Smart Learn
           </div>
-          {session ? (
-            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-              <Link href="/dashboard" style={{ 
-                background: 'rgba(255,255,255,0.05)', 
-                border: '1px solid rgba(255,255,255,0.15)', 
-                padding: '0.5rem 1.25rem', 
-                borderRadius: '6px', 
-                color: '#fbbf24', 
-                textDecoration: 'none', 
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-              }}
-              onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              }}
-              >Dashboard →</Link>
-              <button onClick={() => signOut({ callbackUrl: '/' })} style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                padding: '0.5rem 1.25rem',
-                borderRadius: '6px',
-                color: '#f87171',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-              }}
-              onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-              }}
-              >Sign Out</button>
-            </div>
-          ) : (
-            <button onClick={() => openAuth('login')} style={{ 
-              background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid rgba(255,255,255,0.1)', 
-              padding: '0.5rem 1.25rem', 
-              borderRadius: '6px', 
-              color: '#ffffff', 
-              textDecoration: 'none', 
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-            }}
-            onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-            }}
-            >Sign In</button>
-          )}
+          <button onClick={() => openAuth('login')} style={{ 
+            background: 'rgba(255,255,255,0.05)', 
+            border: '1px solid rgba(255,255,255,0.1)', 
+            padding: '0.5rem 1.25rem', 
+            borderRadius: '6px', 
+            color: '#ffffff', 
+            textDecoration: 'none', 
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+          }}
+          onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          }}
+          >Sign In</button>
         </nav>
 
         {/* Hero Section Vertically Centered */}
@@ -225,61 +183,41 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            {session ? (
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                <Link href="/dashboard" style={{
-                  background: '#fbbf24',
-                  color: '#000000',
-                  fontWeight: 600,
-                  padding: '0.65rem 1.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  textDecoration: 'none'
-                }}>
-                  Go to Dashboard →
-                </Link>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                <button onClick={() => openAuth('signup')} style={{
-                  background: '#fbbf24',
-                  color: '#000000',
-                  fontWeight: 600,
-                  padding: '0.65rem 1.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  display: 'inline-flex',
-                  alignItems: 'center'
-                }}>
-                  Get Started
-                </button>
-                <button onClick={() => openAuth('signup')} style={{
-                  background: 'transparent',
-                  color: '#ffffff',
-                  fontWeight: 500,
-                  padding: '0.65rem 1.75rem',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  transition: 'background 0.2s',
-                  textDecoration: 'none'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  Sign Up
-                </button>
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button onClick={() => openAuth('signup')} style={{
+                background: '#fbbf24',
+                color: '#000000',
+                fontWeight: 600,
+                padding: '0.65rem 1.75rem',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}>
+                Get Started
+              </button>
+              <button onClick={() => openAuth('signup')} style={{
+                background: 'transparent',
+                color: '#ffffff',
+                fontWeight: 500,
+                padding: '0.65rem 1.75rem',
+                borderRadius: '6px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                transition: 'background 0.2s',
+                textDecoration: 'none'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                Sign Up
+              </button>
+            </div>
           </div>
         </main>
       </div>
