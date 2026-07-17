@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Brain, User } from 'lucide-react';
+import { Brain, User, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function TopNavbar() {
   const pathname = usePathname();
@@ -132,6 +132,35 @@ export default function TopNavbar() {
             </div>
           )}
         </Link>
+
+        {session && (
+          <button 
+            onClick={() => signOut({ callbackUrl: '/' })}
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              padding: '0.45rem 1rem',
+              borderRadius: '6px',
+              color: '#f87171',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+            }}
+          >
+            <LogOut size={14} />
+            Sign Out
+          </button>
+        )}
       </div>
     </nav>
   );
