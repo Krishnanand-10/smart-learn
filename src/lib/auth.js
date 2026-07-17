@@ -10,7 +10,11 @@ export const authOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientId: (() => {
+        console.log("[Auth Config Check] GOOGLE_CLIENT_ID defined:", !!process.env.GOOGLE_CLIENT_ID);
+        console.log("[Auth Config Check] GOOGLE_CLIENT_SECRET defined:", !!process.env.GOOGLE_CLIENT_SECRET);
+        return process.env.GOOGLE_CLIENT_ID;
+      })(),
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
