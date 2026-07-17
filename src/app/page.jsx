@@ -173,7 +173,7 @@ export default function Home() {
             1.0.0 Live Now
           </div>
 
-          <h1 style={{ fontSize: '3.6rem', fontWeight: 800, lineHeight: 1.15, marginBottom: '1.5rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
+          <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '1.5rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
             Helping Students Study Better Using<br />
             AI
           </h1>
