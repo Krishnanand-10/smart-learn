@@ -66,7 +66,7 @@ export default function ProfilePage() {
         padding: '2rem',
         marginBottom: '2rem'
       }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#ffffff', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-highlight)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <User size={20} color="var(--accent-color)" />
           Personal Information
         </h2>
@@ -90,7 +90,7 @@ export default function ProfilePage() {
             </div>
             
             <label style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              backgroundColor: 'var(--bg-color)',
               border: '1px solid var(--border-color)',
               padding: '0.5rem 1rem',
               borderRadius: '8px',
@@ -99,56 +99,56 @@ export default function ProfilePage() {
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              transition: 'background 0.2s ease',
-              color: '#e2e8f0'
+              transition: 'all 0.2s ease',
+              color: 'var(--text-main)'
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border-color)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--bg-color)'}
             >
               <Camera size={16} />
               Change Image
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
             </label>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>JPG, GIF or PNG. Max 2MB.</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>JPG, GIF or PNG. Max 2MB.</span>
           </div>
 
           {/* Form Fields Column */}
           <div style={{ flex: 1, minWidth: '250px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Full Name</label>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-subtle)', marginBottom: '0.5rem' }}>Full Name</label>
               <div style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                backgroundColor: 'var(--bg-color)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '8px',
-                color: '#ffffff',
+                color: 'var(--text-highlight)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem'
               }}>
-                <User size={16} color="#94a3b8" />
+                <User size={16} color="var(--text-subtle)" />
                 {user?.name || "Not provided"}
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Email Address</label>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-subtle)', marginBottom: '0.5rem' }}>Email Address</label>
               <div style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                backgroundColor: 'var(--bg-color)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '8px',
-                color: '#ffffff',
+                color: 'var(--text-highlight)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem'
               }}>
-                <Mail size={16} color="#94a3b8" />
+                <Mail size={16} color="var(--text-subtle)" />
                 {user?.email || "Not provided"}
               </div>
-              <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#64748b' }}>
+              <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
                 Your email is synced with your Google account and cannot be changed here.
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function ProfilePage() {
           Danger Zone
         </h2>
         
-        <p style={{ color: '#94a3b8', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.5rem', maxWidth: '600px' }}>
+        <p style={{ color: 'var(--text-subtle)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.5rem', maxWidth: '600px' }}>
           Permanently erase your account and all associated data. This action cannot be reversed.
         </p>
 

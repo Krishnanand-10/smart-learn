@@ -43,7 +43,7 @@ export default function Library() {
     return (
       <div className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '15vh' }}>
         <div className="glass-panel" style={{ padding: '3rem', borderRadius: '16px', maxWidth: '500px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.8rem', color: '#ffffff', marginBottom: '1rem', fontWeight: 700 }}>My Study Library</h2>
+          <h2 style={{ fontSize: '1.8rem', color: 'var(--text-highlight)', marginBottom: '1rem', fontWeight: 700 }}>My Study Library</h2>
           <p style={{ color: 'var(--text-subtle)', marginBottom: '2rem', lineHeight: 1.6 }}>
             Please sign in to view and review your saved study materials, quizzes, flashcards, and summaries.
           </p>
@@ -107,11 +107,11 @@ export default function Library() {
                     <div 
                       key={q.id} 
                       onClick={() => setViewQuiz(q)}
-                      style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
+                      style={{ padding: '0.75rem', background: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s ease' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
                     >
-                      <span style={{ fontSize: '0.9rem', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{q.title}</span>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{q.title}</span>
                       <ArrowRight size={14} color="var(--text-subtle)" />
                     </div>
                   ))}
@@ -132,11 +132,11 @@ export default function Library() {
                     <div 
                       key={s.id} 
                       onClick={() => setViewSummary(s)}
-                      style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
+                      style={{ padding: '0.75rem', background: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s ease' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
                     >
-                      <span style={{ fontSize: '0.9rem', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{s.title}</span>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{s.title}</span>
                       <ArrowRight size={14} color="var(--text-subtle)" />
                     </div>
                   ))}
@@ -157,11 +157,11 @@ export default function Library() {
                     <div 
                       key={f.id} 
                       onClick={() => setViewFlashcards(f)}
-                      style={{ padding: '0.75rem', background: '#121212', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'border-color 0.2s' }}
+                      style={{ padding: '0.75rem', background: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s ease' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-color)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
                     >
-                      <span style={{ fontSize: '0.9rem', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{f.title}</span>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{f.title}</span>
                       <ArrowRight size={14} color="var(--text-subtle)" />
                     </div>
                   ))}
