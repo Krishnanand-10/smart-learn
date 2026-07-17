@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
+  debug: true,
   session: {
     strategy: 'jwt',
   },
