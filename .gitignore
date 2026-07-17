@@ -39,3 +39,6 @@ LEARNING_LOG.md
 # SQLite database
 /prisma/*.db
 /prisma/*.db-journal
+
+# Scratch directory
+/scratch/

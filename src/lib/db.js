@@ -1,8 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
 const globalForPrisma = global;
 
 const createPrismaClient = () => {
@@ -11,6 +10,9 @@ const createPrismaClient = () => {
 
   if (isPostgres) {
     // PostgreSQL database connection (Supabase) using PG Driver Adapter
+    const pg = require('pg');
+    const { PrismaPg } = require('@prisma/adapter-pg');
+    
     const pool = new pg.Pool({
       connectionString: databaseUrl,
     });
@@ -21,6 +23,8 @@ const createPrismaClient = () => {
     });
   } else {
     // Local SQLite database connection uses better-sqlite3 driver adapter
+    const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+    
     const adapter = new PrismaBetterSqlite3({
       url: databaseUrl || 'file:./prisma/dev.db',
     });
@@ -31,6 +35,18 @@ const createPrismaClient = () => {
   }
 };
 
-export const prisma = globalForPrisma.prisma || createPrismaClient();
+let prismaInstance = null;
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// Lazy initialize Prisma client using Proxy to avoid loading native binaries during build-time compilation
+export const prisma = new Proxy({}, {
+  get(target, prop) {
+    if (prop === 'then') return undefined; // Avoid promise resolution check loop
+    if (!prismaInstance) {
+      prismaInstance = globalForPrisma.prisma || createPrismaClient();
+      if (process.env.NODE_ENV !== 'production') {
+        globalForPrisma.prisma = prismaInstance;
+      }
+    }
+    return prismaInstance[prop];
+  }
+});

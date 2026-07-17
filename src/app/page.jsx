@@ -2,8 +2,26 @@
 
 import Link from 'next/link';
 import { Brain, Sparkles, MessageCircle, CreditCard, ClipboardList, Upload, Link as LinkIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import AuthModal from '@/components/AuthModal';
+
+const getErrorMessage = (error) => {
+  switch (error) {
+    case 'Configuration':
+      return 'Server configuration error. Please verify your environment variables and database configuration.';
+    case 'OAuthSignin':
+      return 'Error starting the Google sign-in process. Please verify your Google Client ID/Secret settings.';
+    case 'OAuthCallback':
+      return 'Error completing the Google sign-in. This usually happens if the production URL is not authorized in your Google Cloud Console, or if the database is unreachable.';
+    case 'OAuthCreateAccount':
+      return 'Could not create a user account in the database. Please verify your database connection.';
+    case 'Callback':
+      return 'Callback error during authentication. Check server logs for details.';
+    default:
+      return `Authentication failed: ${error}. Please check your server logs.`;
+  }
+};
 
 export default function Home() {
   const features = [
@@ -15,13 +33,24 @@ export default function Home() {
     { title: 'Paste Links', desc: 'Paste YouTube links or web articles—our engine handles the rest seamlessly.', icon: LinkIcon, color: '#ec4899' }
   ];
 
+  const { data: session } = useSession();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
+  const [authError, setAuthError] = useState(null);
 
   const openAuth = (mode) => {
     setAuthMode(mode);
     setShowAuthModal(true);
   };
+
+  // Extract auth error if present in URL query parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      setAuthError(error);
+    }
+  }, []);
 
   // Force a deeply engaging, dark base theme for the landing
   useEffect(() => {
@@ -49,6 +78,47 @@ export default function Home() {
       <div style={{ position: 'absolute', top: '-10%', left: '20%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(0,0,0,0) 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'absolute', top: '40%', right: '-10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, rgba(0,0,0,0) 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
 
+      {/* Authentication Error Banner */}
+      {authError && (
+        <div style={{
+          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+          borderBottom: '1px solid rgba(239, 68, 68, 0.3)',
+          color: '#fca5a5',
+          padding: '1rem 5%',
+          fontSize: '0.9rem',
+          textAlign: 'center',
+          zIndex: 100,
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '1rem',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <span><strong>Authentication Error:</strong> {getErrorMessage(authError)}</span>
+          <button 
+            onClick={() => {
+              setAuthError(null);
+              const url = new URL(window.location);
+              url.searchParams.delete('error');
+              window.history.replaceState({}, document.title, url.pathname + url.search);
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '4px',
+              color: '#ffffff',
+              padding: '0.25rem 0.6rem',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              fontWeight: 600
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Hero Wrapper - set to 93vh to perfectly cut the Features section in half at the bottom */}
       <div style={{ minHeight: '93vh', display: 'flex', flexDirection: 'column' }}>
         {/* Navbar */}
@@ -59,25 +129,67 @@ export default function Home() {
             </div>
             Smart Learn
           </div>
-          <button onClick={() => openAuth('login')} style={{ 
-            background: 'rgba(255,255,255,0.05)', 
-            border: '1px solid rgba(255,255,255,0.1)', 
-            padding: '0.5rem 1.25rem', 
-            borderRadius: '6px', 
-            color: '#ffffff', 
-            textDecoration: 'none', 
-            fontSize: '0.9rem',
-            fontWeight: 500,
-            transition: 'all 0.3s ease',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-          }}
-          onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-          }}
-          >Sign In</button>
+          {session ? (
+            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+              <Link href="/dashboard" style={{ 
+                background: 'rgba(255,255,255,0.05)', 
+                border: '1px solid rgba(255,255,255,0.15)', 
+                padding: '0.5rem 1.25rem', 
+                borderRadius: '6px', 
+                color: '#fbbf24', 
+                textDecoration: 'none', 
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+              }}
+              onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+              }}
+              >Dashboard →</Link>
+              <button onClick={() => signOut({ callbackUrl: '/' })} style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                padding: '0.5rem 1.25rem',
+                borderRadius: '6px',
+                color: '#f87171',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+              }}
+              onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+              }}
+              >Sign Out</button>
+            </div>
+          ) : (
+            <button onClick={() => openAuth('login')} style={{ 
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              padding: '0.5rem 1.25rem', 
+              borderRadius: '6px', 
+              color: '#ffffff', 
+              textDecoration: 'none', 
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            }}
+            onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+            }}
+            >Sign In</button>
+          )}
         </nav>
 
         {/* Hero Section Vertically Centered */}
@@ -108,38 +220,61 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button onClick={() => openAuth('signup')} style={{
-              background: '#fbbf24',
-              color: '#000000',
-              fontWeight: 600,
-              padding: '0.65rem 1.75rem',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '0.95rem',
-              display: 'inline-flex',
-              alignItems: 'center'
-            }}>
-              Get Started
-            </button>
-            <button onClick={() => openAuth('signup')} style={{
-              background: 'transparent',
-              color: '#ffffff',
-              fontWeight: 500,
-              padding: '0.65rem 1.75rem',
-              borderRadius: '6px',
-              border: '1px solid rgba(255,255,255,0.15)',
-              cursor: 'pointer',
-              fontSize: '0.95rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              transition: 'background 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              Sign Up
-            </button>
+            {session ? (
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <Link href="/dashboard" style={{
+                  background: '#fbbf24',
+                  color: '#000000',
+                  fontWeight: 600,
+                  padding: '0.65rem 1.75rem',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  textDecoration: 'none'
+                }}>
+                  Go to Dashboard →
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button onClick={() => openAuth('signup')} style={{
+                  background: '#fbbf24',
+                  color: '#000000',
+                  fontWeight: 600,
+                  padding: '0.65rem 1.75rem',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  display: 'inline-flex',
+                  alignItems: 'center'
+                }}>
+                  Get Started
+                </button>
+                <button onClick={() => openAuth('signup')} style={{
+                  background: 'transparent',
+                  color: '#ffffff',
+                  fontWeight: 500,
+                  padding: '0.65rem 1.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  transition: 'background 0.2s',
+                  textDecoration: 'none'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
           </div>
         </main>
       </div>
