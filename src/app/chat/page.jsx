@@ -242,6 +242,28 @@ export default function Chat() {
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
             Context: <strong style={{ color: 'var(--text-highlight)' }}>{contextInfo.label}</strong>
           </span>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('smartLearn_content');
+              setSavedContent(null);
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-main)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.2rem',
+              borderRadius: '50%',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--border-hover)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
