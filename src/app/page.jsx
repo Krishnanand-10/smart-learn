@@ -174,8 +174,8 @@ export default function Home() {
           </div>
 
           <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '1.5rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
-            Helping Students Study Better Using<br />
-            AI
+            Helping Students Study Better<br />
+            Using AI
           </h1>
           
           <p style={{ fontSize: '1.1rem', color: '#a1a1aa', maxWidth: '650px', margin: '0 auto 2.5rem', lineHeight: 1.6 }}>
