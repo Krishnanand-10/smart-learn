@@ -4,7 +4,7 @@ import NextAuthProvider from '@/components/NextAuthProvider';
 
 export const metadata = {
   title: 'Smart Learn',
-  description: 'AI-Powered Exam Preparation Engine',
+  description: 'AI-Powered Study and Learning Platform',
 };
 
 export default function RootLayout({ children }) {
